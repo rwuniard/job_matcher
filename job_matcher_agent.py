@@ -42,6 +42,13 @@ def initialize_agent():
         - Specific Accomplishments: Only weight accomplishments from the last 5 years.
         - Strict Reason for Score: (Focus specifically on why the domain matches or fails)
         - Recency Audit: [List most recent relevant leadership role and year]
+
+        Output Format:
+        - Overall Match Score: [X/10]
+        - Domain Alignment: [candidate domain vs JD domain]
+        - Top 3 Relevant Assets: (recent only)
+        - Top 3 Gaps/Irrelevancies: (include outdated skills)
+        - Recency Check: [Pass/Fail for 5/10 year rules]
         """)
 
     resume = get_resume("resume.txt")
@@ -55,21 +62,18 @@ def initialize_agent():
     Today's date: {today_date}
     Conduct a rigorous gap analysis between the following resume and job description.:
 
-    Output Format:
-    - Overall Match Score: [X/10]
-    - Domain Alignment: [candidate domain vs JD domain]
-    - Top 3 Relevant Assets: (recent only)
-    - Top 3 Gaps/Irrelevancies: (include outdated skills)
-    - Recency Check: [Pass/Fail for 5/10 year rules]
-
     Resume: {resume}
     
     Job Description: {job_details_description}
     """
         
     results = agent.invoke({"messages": [{"role": "user", "content": user_message}]})
-    for message in results.get("messages"):
-        print(message.content)
+    # for message in results.get("messages"):
+    #     print("Agent response:", message.content)
+    
+    # Get the AI final response and print it
+    ai_response = results.get("messages")[-1].content
+    print("AI Response:", ai_response)
 
 
 def main():
