@@ -14,6 +14,8 @@ class LinkedInJob:
 def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
     """
     Load a LinkedIn job posting using Playwright.
+    This is for private LinkedIn pages, so we need to log in to LinkedIn.
+    The session is saved to ./linkedin_session/ directory.
 
     Args:
         url: LinkedIn job URL
