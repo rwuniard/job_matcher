@@ -14,5 +14,5 @@
 .env.production
 linkedin_session/
 resume.txt
-
+__pycache__
 

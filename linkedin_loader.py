@@ -3,11 +3,11 @@ from bs4 import BeautifulSoup
 
 
 def get_linkedin_job_public(url: str) -> dict:
-    """
+    f"""
     Load a LinkedIn job description from public page (no authentication required).
 
     Args:
-        url: LinkedIn job URL (e.g., https://www.linkedin.com/jobs/view/123456/)
+        url: LinkedIn job URL (e.g., https://www.linkedin.com/jobs/view/{job_id}/)
 
     Returns:
         Dictionary with job details: title, company, location, description

@@ -23,8 +23,8 @@ This project:
 # Install dependencies
 uv sync
 
-# Or add them manually:
-uv add langchain langchain-google-genai langchain-community beautifulsoup4 python-dotenv
+# Install with dev dependencies (recommended for testing)
+uv sync --extra dev
 ```
 
 ## Configuration
@@ -45,6 +45,21 @@ GOOGLE_API_KEY=your-google-api-key-here
 uv run python main.py
 ```
 
+## Running Tests
+
+This project uses `pytest` for unit testing.
+
+```bash
+# Run tests with dev dependencies enabled
+uv run --extra dev pytest -q
+```
+
+Current unit tests cover:
+- `get_resume.py` file loading behavior
+- `linkedin_loader.py` HTML parsing with mocked network responses
+- `linkedin_loader_private.py` status parsing logic with mocked Playwright objects
+- `job_matcher_agent.py` open/applied/closed flow behavior with mocked LLM and loader dependencies
+
 ## Project Structure
 
 ```
@@ -52,8 +67,13 @@ job_matcher/
 ├── main.py                 # Entry point
 ├── job_matcher_agent.py    # LangChain agent with evaluation criteria
 ├── linkedin_loader.py      # Public LinkedIn job scraper (no auth)
-├── url_loader.py           # Reference: Authenticated LinkedIn scraper
+├── linkedin_loader_private.py  # Playwright-based loader for authenticated pages
 ├── get_resume.py           # Resume file reader
+├── tests/                  # Unit tests
+│   ├── test_get_resume.py
+│   ├── test_job_matcher_agent.py
+│   ├── test_linkedin_loader.py
+│   └── test_linkedin_loader_private.py
 └── resume.txt              # Your resume content
 ```
 
@@ -72,14 +92,14 @@ print(job["title"])
 print(job["description"])
 ```
 
-**`url_loader.py`** (Reference Implementation)
+**`linkedin_loader_private.py`** (Authenticated/Private pages)
 - Uses Playwright with persistent browser session
 - Required for authenticated LinkedIn pages or jobs not publicly visible
 - Requires one-time manual login
 
 To use authenticated scraping:
-1. Install Playwright: `uv add playwright && uv run playwright install chromium`
-2. In `url_loader.py`, set `first_login=True` and run once
+1. Install Playwright browser: `uv run playwright install chromium`
+2. In `linkedin_loader_private.py`, set `first_login=True` and run once
 3. Log in to LinkedIn in the browser window
 4. Press Enter after login completes
 5. Session is saved to `./linkedin_session/`

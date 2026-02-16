@@ -6,9 +6,19 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4>=4.14.3",
+    "python-dotenv>=1.1.1",
     "langchain>=1.2.6",
     "langchain-community>=0.4.1",
     "langchain-google-genai>=2.0.0",
     "langchain-openai>=1.1.7",
     "playwright>=1.57.0",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.2",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
