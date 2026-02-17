@@ -1,8 +1,8 @@
-from job_matcher_agent import initialize_agent
+from job_matcher_agent import match_job
 
 def main():
     print("Hello from job-matcher!")
-    initialize_agent()  
+    match_job("https://www.linkedin.com/jobs/view/4333297231/")
 
 if __name__ == "__main__":
     main()

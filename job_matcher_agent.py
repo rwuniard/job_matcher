@@ -71,8 +71,10 @@ def match_job(job_url: str):
     job = get_linkedin_job(job_url)
     
     # Check if the job is open, applied, or closed.
-    if job.status == "applied" or job.status == "closed":
-        print("The candidate has applied to the job or the job is closed.")
+    if job.status == "applied":
+        print("The candidate has applied to the job.")
+    elif job.status == "closed":
+        print("The job is closed.")
     else:
         job_details_description = job.description
         job_details_title = job.title
