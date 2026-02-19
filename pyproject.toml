@@ -12,6 +12,8 @@ dependencies = [
     "langchain-google-genai>=2.0.0",
     "langchain-openai>=1.1.7",
     "playwright>=1.57.0",
+    "stomp-py>=8.2.0",
+    "python-json-logger>=4.0.0",
 ]
 
 [project.optional-dependencies]

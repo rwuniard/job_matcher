@@ -15,4 +15,6 @@
 linkedin_session/
 resume.txt
 __pycache__
+.pytest_cache/
+
 

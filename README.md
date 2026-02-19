@@ -16,6 +16,7 @@ This project:
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/) package manager
 - Google API key (for Gemini)
+- ActiveMQ or STOMP-compatible message broker (for queue consumer)
 
 ## Setup
 
@@ -69,6 +70,8 @@ job_matcher/
 ├── linkedin_loader.py      # Public LinkedIn job scraper (no auth)
 ├── linkedin_loader_private.py  # Playwright-based loader for authenticated pages
 ├── get_resume.py           # Resume file reader
+├── queue_consumer/         # STOMP message queue consumer
+│   └── consumer.py         # ActiveMQ/STOMP queue listener
 ├── tests/                  # Unit tests
 │   ├── test_get_resume.py
 │   ├── test_job_matcher_agent.py
