@@ -36,9 +36,14 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
         if first_login:
             print("Please log in to LinkedIn in the browser window...")
             input("Press Enter after logging in and the job page has loaded...")
+            page.goto(url, wait_until="domcontentloaded")
+            page.wait_for_timeout(3000)
 
-        # Wait for job description to load
-        page.wait_for_selector(".jobs-description", timeout=30000)
+        # Wait for job description to load (scoped to the "About the job" section)
+        page.wait_for_selector(
+            "[data-sdui-component='com.linkedin.sdui.generated.jobseeker.dsl.impl.aboutTheJob'] [data-testid='expandable-text-box']",
+            timeout=30000
+        )
 
         # Extract job title
         title_selectors = [
@@ -86,13 +91,14 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
             elif "application submitted" in page_text:
                 status = "applied"
 
-        # Click "See more" button to expand full description
-        see_more_button = page.locator(".jobs-description button[aria-label*='more']")
+        # Click "... more" button to expand full description (scoped to job description section)
+        about_section = page.locator("[data-sdui-component='com.linkedin.sdui.generated.jobseeker.dsl.impl.aboutTheJob']")
+        see_more_button = about_section.locator("[data-testid='expandable-text-button']")
         if see_more_button.count() > 0:
-            see_more_button.first.click()
+            see_more_button.first.evaluate("el => el.click()")  # JS click bypasses overlay interception
             page.wait_for_timeout(500)  # Wait for expansion animation
 
-        description = page.locator(".jobs-description").inner_text()
+        description = about_section.locator("[data-testid='expandable-text-box']").inner_text()
 
         browser.close()
         return LinkedInJob(title=title, description=description, status=status)
@@ -101,7 +107,7 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
 def main():
     #job_url = "https://www.linkedin.com/jobs/view/4328534952/" # job applied
     #job_url = "https://www.linkedin.com/jobs/view/4365010800/" # job no longer accepting applications
-    job_url = "https://www.linkedin.com/jobs/view/4350687450/" # job open
+    job_url = "https://www.linkedin.com/jobs/view/4374040129/" # job open
 
     # First run: set first_login=True to log in manually
     # After that: set first_login=False (session is saved)

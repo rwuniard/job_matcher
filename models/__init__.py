@@ -1,0 +1,1 @@
+from .linkedin import Job, LinkedInJobAlert

@@ -10,7 +10,13 @@ from get_resume import get_resume
 from linkedin_loader_private import get_linkedin_job
 #from linkedin_loader import get_linkedin_job_public
 
+from logger import setup_logging
+import logging
+
 from datetime import date
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -18,7 +24,7 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 
 def match_job(job_url: str):
-
+    logger.info(f"Matching job-url: {job_url}")
 
     model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
 
@@ -69,12 +75,20 @@ def match_job(job_url: str):
     # Get job description from linkedin using linkedin_loader_private.py. This is from linkedin private page.
     # This allows us to know whether the candidate has applied to
     job = get_linkedin_job(job_url)
-    
+
+    # Get the job id from the job url.
+    job_id = job_url.rstrip("/").split("/")[-1]
+    # Create the job_results directory if it doesn't exist.
+    os.makedirs("./job_results", exist_ok=True)
     # Check if the job is open, applied, or closed.
     if job.status == "applied":
-        print("The candidate has applied to the job.")
+        with open(f"./job_results/{job_id}.applied", "w") as f:
+            f.write(job.description)
+        logger.debug("The candidate has applied to the job.")
     elif job.status == "closed":
-        print("The job is closed.")
+        with open(f"./job_results/{job_id}.closed", "w") as f:
+            f.write(job.description)
+        logger.debug("The job is closed.")
     else:
         job_details_description = job.description
         job_details_title = job.title
@@ -98,11 +112,16 @@ def match_job(job_url: str):
         
         # Get the AI final response and print it
         ai_response = results.get("messages")[-1].content
-        print("AI Response:", ai_response)
+        logger.debug("AI Response:", ai_response)
+        
+        
+        with open(f"./job_results/{job_id}.ai_response", "w") as f:
+            f.write(f"Job URL: {job_url}\n")
+            f.write(ai_response)
 
 
 def main():
-    match_job("https://www.linkedin.com/jobs/view/4365177577/")
+    match_job("https://www.linkedin.com/jobs/view/4374040129/")
 
 if __name__ == "__main__":
     main()

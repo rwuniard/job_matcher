@@ -1,133 +1,125 @@
-import stomp
-from dotenv import load_dotenv
+
 import os
 import time
 import sys
 from logger import setup_logging
 import logging
+import threading
+
+from proton import Timeout
+from proton.utils import BlockingConnection
+
+from .message_processor import MessageProcessor
 
 # Setup logging
 setup_logging()
 # Get the logger for the current module
 logger = logging.getLogger(__name__)
 
-
-
-# Load environment variables
-load_dotenv()
-
-HOST = os.getenv('HOST')
-PORT = os.getenv('PORT')
-USERNAME = os.getenv('USERNAME')
-PASSWORD = os.getenv('PASSWORD')
-DESTINATION = os.getenv('DESTINATION')
-print(HOST, PORT, USERNAME, PASSWORD, DESTINATION)
-
-
-class MyListener(stomp.ConnectionListener):
-    def __init__(self, conn):
-        self.conn = conn
-
-    def on_message(self, frame):
-        logger.info(f"Received message: {frame.body}")
-        logger.info(f"All headers: {frame.headers}")
-        try:
-            self.conn.ack(frame.headers['message-id'], frame.headers['subscription'])
-            logger.info(f"Ack'ed message: {frame.headers['message-id']} with subscription: {frame.headers['subscription']}")
-        except Exception as e:
-            logger.error(f"ACK failed for message: {frame.headers['message-id']} with subscription: {frame.headers['subscription']} with error: {e}")
-
-    def on_error(self, frame):
-        logger.error(f"MyListener on Error: {frame.body}")
-        logger.error(f"MyListener on Error: All headers: {frame.headers}")
-       
-
-    def on_disconnected(self):
-        logger.info("MyListener on Disconnect: Disconnected from ActiveMQ")
-
-
 class QueueConsumer:
-    def __init__(self, host, port, username, password, destination, client_id, prefetch_count=10):
+    """QueueConsumer class for consuming messages from an AMQP broker."""
+    _heartbeat = 60
+    _timeout = 30
+
+
+    """QueueConsumer class for consuming messages from an AMQP broker."""
+    def __init__(self, host, port, username, password, address, queue_name, num_consumers, message_processor: MessageProcessor):
+        """Initialize the QueueConsumer."""
         self.host = host
         self.port = port
         self.username = username
         self.password = password
-        self.destination = destination,
-        self.client_id = client_id
-        self.prefetch_count = prefetch_count
+        self.address = address
+        self.queue_name = queue_name
+        self.num_consumers = num_consumers
+        self.amqp_destination = f'{self.address}::{self.queue_name}'
+        self.message_processor = message_processor
 
-    def connect(self):
-        self.conn = stomp.Connection([(self.host, int(self.port))], heartbeats=(10000, 10000))
-        self.conn.connect(self.username, self.password, wait=True, headers={'client-id': self.client_id})
-        self.conn.set_listener('', MyListener(self.conn))
-        logger.info(f"Connected to ActiveMQ: {self.host}:{self.port}")
+    def worker(self, worker_id: int):
+        """Worker function for consuming messages from the AMQP broker.
+        Args:
+            worker_id: The ID of the worker
+        """
+        try:
+            # Connect to the AMQP broker
+            url = f'amqp://{self.username}:{self.password}@{self.host}:{self.port}'
+            conn = BlockingConnection(url, heartbeat=QueueConsumer._heartbeat, timeout=QueueConsumer._timeout)
+            receiver = conn.create_receiver(self.amqp_destination, credit=1)
+            logger.info(f"Connected to the AMQP broker: {url}")
 
-    def subscribe(self):
-        self.conn.subscribe(
-            destination=self.destination, 
-            id=1, 
-            ack='client', 
-            headers={
-                'subscription-type': 'MULTICAST', 
-                'durable-subscription-name': 'my-durable-subscription',
-                'activemq.prefetchPolicy.all': str(self.prefetch_count) # Prefetch 10 messages at a time
-            }
-        )
+            while True:
+                # Receive a message from the AMQP broker
+                try:
+                    msg = receiver.receive(timeout=QueueConsumer._timeout)
+                    if msg:
+                        logger.info(f"{worker_id} received message-id: {msg.id}")
+                        # Process the message using the message processor
+                        ok = self.message_processor(msg.id, msg.body)
+                        if ok:
+                            receiver.accept()
+                        else:
+                            logger.error(f"{worker_id} message-id: {msg.id} processing failed")
+                            receiver.reject()
+                    else:
+                        logger.info(f"{worker_id} message is empty, message-id: {msg.id}, body: {msg.body}")
+                except Timeout:
+                    logger.debug(f"{worker_id} timed out after {QueueConsumer._timeout} seconds")
+                    continue
+                except Exception as e:
+                    logger.error(f"{worker_id} message-id: {msg.id} error: {e}")
+                    continue
+        except Exception as e:
+            logger.error(f"{worker_id} error: {e}")
+        finally:
+            conn.close()
+            logger.info(f"{worker_id} disconnected from the AMQP broker")
 
-    def disconnect(self):
-        self.conn.disconnect()
 
 def main():
-    load_dotenv()
-    # Get environment variables
-    HOST = os.getenv('HOST')
-    PORT = os.getenv('PORT')
-    USERNAME = os.getenv('USERNAME')
-    PASSWORD = os.getenv('PASSWORD')
-    DESTINATION = os.getenv('DESTINATION')
-    logger.info(f"HOST: {HOST}, PORT: {PORT}, USERNAME: {USERNAME}, PASSWORD: {PASSWORD}, DESTINATION: {DESTINATION}")
 
+    def message_processor(message_id: str, message_body: str) -> bool:
+        """Message processor function for processing messages from the AMQP broker.
+        Args:
+            message_id: The ID of the message
+            message_body: The body of the message
+        Returns:
+            True if the message was processed successfully, False otherwise
+        """
+        logger.info("################################################################################")
+        logger.info(f"Processing message-id: {message_id}, body: {message_body}")
+        logger.info("################################################################################")
+        return True
+    
     try:
-        if len(sys.argv) != 2:
-            logger.error("Usage: python activemq_consumer.py <client_id>")
-            sys.exit(1)
+        from dotenv import load_dotenv
+        # Load environment variables
+        load_dotenv()
+        HOST = os.getenv('HOST')
+        PORT = os.getenv('PORT')
+        USERNAME = os.getenv('USERNAME')
+        PASSWORD = os.getenv('PASSWORD')
+        ADDRESS = os.getenv('ADDRESS')
+        QUEUE_NAME = os.getenv('QUEUE_NAME')
+        NUM_CONSUMERS = int(os.getenv('NUM_CONSUMERS'))
+        logger.info(f"HOST: {HOST}, PORT: {PORT}, USERNAME: {USERNAME}, PASSWORD: {PASSWORD},"
+                    f"ADDRESS: {ADDRESS}, QUEUE_NAME: {QUEUE_NAME}, NUM_CONSUMERS: {NUM_CONSUMERS}")
 
-        client_id = sys.argv[1]
-        logger.info(f"Client ID: {client_id}")
+        consumer = QueueConsumer(HOST, PORT, USERNAME, PASSWORD, ADDRESS, QUEUE_NAME, NUM_CONSUMERS, message_processor)
 
-        consumer = QueueConsumer(HOST, PORT, USERNAME, PASSWORD, DESTINATION, client_id, prefetch_count=10)
-        consumer.connect()
-        consumer.subscribe()
-
-        # heartbeats=(10000, 10000) means send heartbeat every 10 seconds and expect heartbeat every 10 seconds
-        # conn = stomp.Connection([(HOST, PORT)], heartbeats=(10000, 10000))
-        # # Set the client-id so the consumer can be identified
-        # conn.connect(USERNAME, PASSWORD, wait=True, headers={'client-id': client_id})
-        # conn.set_listener('', MyListener(conn))
-
-        # # Set it to multicast so each subscriber gets a copy of the message
-        # # Set it to durable so the messages are persisted to the queue even if the consumer is disconnected
-        # # Set it to client-id so the consumer can be identified
-        # conn.subscribe(
-        #     destination=DESTINATION, 
-        #     id=1, 
-        #     ack='client', 
-        #     headers={
-        #         'subscription-type': 'MULTICAST', 
-        #         'durable-subscription-name': 'my-durable-subscription'
-        #     }
-        # )
-        # print("Connected to ActiveMQ")
+        for i in range(NUM_CONSUMERS):
+            thread = threading.Thread(target=consumer.worker, args=(i,), daemon=True, name=f"consumer-worker-{i}")
+            thread.start()
+            logger.info(f"Started consumer-worker-{i}")
         while True:
             time.sleep(1)
-
-        conn.disconnect()
-        print("Disconnected from ActiveMQ")
-    
+    # except KeyboardInterrupt:
+    #     logger.info("Keyboard interrupt received, shutting down...")
+    #     consumer.disconnect()
+    #     sys.exit(0)
     except Exception as e:
         logger.error(f"Error: {e}")
-        consumer.disconnect()
-        print("Disconnected from ActiveMQ")
+        sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
