@@ -23,7 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 def message_processor(message_id: str, message_body: str) -> bool:
-    """Message processor function for processing messages from the AMQP broker.
+    """
+    Message processor function for processing messages from the AMQP broker.
+    This function is called by the QueueConsumer when a new message is received.
+    It processes the message and writes the AI response to a file.
     Args:
         message_id: The ID of the message
         message_body: The body of the message
@@ -34,7 +37,21 @@ def message_processor(message_id: str, message_body: str) -> bool:
         alert = LinkedInJobAlert.model_validate_json(message_body)
         for job in alert.jobs:
             logger.info(f"Processing job-url: {job.url}")
-            match_job(job.url)
+            ai_response = match_job(job.url)
+            logger.info(f"AI Response: {ai_response}")
+
+            # Write the AI response to a file.
+            # Get the job id from the job url.
+            job_id = job.url.rstrip("/").split("/")[-1]
+            # Create the job_results directory if it doesn't exist.
+            os.makedirs("./job_results", exist_ok=True)
+            with open(f"./job_results/{job_id}.ai_response", "w") as f:
+                f.write(f"Job URL: {job.url}\n")
+                f.write(f"From email subject: {alert.subject}\n")
+                f.write(f"From email date: {alert.date}\n")
+                f.write(f"Job Title: {job.title}\n")
+                f.write(f"AI Response: {ai_response}\n")
+            
         return True
     except Exception as e:
         print(f"Error processing message-id: {message_id}, body: {message_body}, error: {e}")

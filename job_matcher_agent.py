@@ -23,7 +23,14 @@ load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 
-def match_job(job_url: str):
+def match_job(job_url: str) -> str:
+    """
+    Match a job and return the AI response.
+    Args:
+        job_url: The URL of the job to match.
+    Returns:
+        The AI response.
+    """
     logger.info(f"Matching job-url: {job_url}")
 
     model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
@@ -76,10 +83,7 @@ def match_job(job_url: str):
     # This allows us to know whether the candidate has applied to
     job = get_linkedin_job(job_url)
 
-    # Get the job id from the job url.
-    job_id = job_url.rstrip("/").split("/")[-1]
-    # Create the job_results directory if it doesn't exist.
-    os.makedirs("./job_results", exist_ok=True)
+ 
     # Check if the job is open, applied, or closed.
     if job.status == "applied":
         with open(f"./job_results/{job_id}.applied", "w") as f:
@@ -114,10 +118,8 @@ def match_job(job_url: str):
         ai_response = results.get("messages")[-1].content
         logger.debug("AI Response:", ai_response)
         
-        
-        with open(f"./job_results/{job_id}.ai_response", "w") as f:
-            f.write(f"Job URL: {job_url}\n")
-            f.write(ai_response)
+
+        return ai_response
 
 
 def main():

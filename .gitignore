@@ -12,9 +12,10 @@
 .env.development
 .env.test
 .env.production
-linkedin_session/
+/linkedin_session/
 resume.txt
-__pycache__
+__pycache__/
+/__pycache__/
 .pytest_cache/
 /job_results/
 
