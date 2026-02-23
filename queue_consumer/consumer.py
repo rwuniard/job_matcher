@@ -1,13 +1,13 @@
 
 import os
-import time
 import sys
 from logger import setup_logging
 import logging
 import threading
 
-from proton import Timeout
-from proton.utils import BlockingConnection
+from proton import Delivery
+from proton.handlers import MessagingHandler
+from proton.reactor import Container
 
 from .message_processor import MessageProcessor
 
@@ -16,13 +16,82 @@ setup_logging()
 # Get the logger for the current module
 logger = logging.getLogger(__name__)
 
+
+class ConsumerHandler(MessagingHandler):
+    """Event-driven AMQP message handler.
+
+    The Container runs the IO loop internally, so heartbeats are always sent
+    regardless of how long message processing takes. Each message is processed
+    in a background thread; when done, the delivery settlement is scheduled
+    back onto the Container's IO thread (the only thread-safe way to call it).
+    """
+
+    def __init__(self, url: str, amqp_destination: str, credit: int, message_processor: MessageProcessor):
+        super().__init__(prefetch=credit)
+        self.url = url
+        self.amqp_destination = amqp_destination
+        self.message_processor = message_processor
+        self._pending: dict[object, bool | None] = {}  # delivery → result (None = in-progress)
+        self._lock = threading.Lock()
+
+    # ── Container lifecycle ────────────────────────────────────────────────
+
+    def on_start(self, event):
+        conn = event.container.connect(self.url)
+        event.container.create_receiver(conn, self.amqp_destination)
+        logger.info(f"Connected to the AMQP broker: {self.url}")
+
+    def on_disconnected(self, event):
+        logger.warning(f"Disconnected from the AMQP broker: {self.url}")
+
+    def on_error(self, event):
+        logger.error(f"AMQP error: {event}")
+
+    # ── Message handling ───────────────────────────────────────────────────
+
+    def on_message(self, event):
+        msg = event.message
+        delivery = event.delivery
+        logger.info(f"Received message-id: {msg.id}")
+
+        # Register delivery as in-progress before spawning the thread
+        with self._lock:
+            self._pending[delivery] = None
+
+        def _process():
+            try:
+                ok = self.message_processor(msg.id, msg.body)
+            except Exception as e:
+                logger.error(f"message-id: {msg.id} processing raised exception: {e}")
+                ok = False
+
+            # Store result and schedule settlement back onto the IO thread
+            with self._lock:
+                self._pending[delivery] = ok
+            event.container.schedule(0, self)
+
+        threading.Thread(target=_process, daemon=True).start()
+
+    def on_timer_task(self, _event):
+        """Called by Container.schedule() — runs on the IO thread, safe to settle deliveries."""
+        with self._lock:
+            settled = {d: r for d, r in self._pending.items() if r is not None}
+            for delivery in settled:
+                del self._pending[delivery]
+
+        for delivery, ok in settled.items():
+            if ok:
+                delivery.update(Delivery.ACCEPTED)
+                logger.info(f"Accepted delivery: {delivery.tag}")
+            else:
+                delivery.update(Delivery.REJECTED)
+                logger.error(f"Rejected delivery: {delivery.tag}")
+            delivery.settle()
+
+
 class QueueConsumer:
-    """QueueConsumer class for consuming messages from an AMQP broker."""
-    _heartbeat = 60
-    _timeout = 30
+    """QueueConsumer — manages configuration and starts the Container."""
 
-
-    """QueueConsumer class for consuming messages from an AMQP broker."""
     def __init__(self, host, port, username, password, address, queue_name, num_consumers, message_processor: MessageProcessor):
         """Initialize the QueueConsumer."""
         self.host = host
@@ -34,45 +103,18 @@ class QueueConsumer:
         self.num_consumers = num_consumers
         self.amqp_destination = f'{self.address}::{self.queue_name}'
         self.message_processor = message_processor
+        self.url = f'amqp://{self.username}:{self.password}@{self.host}:{self.port}'
 
-    def worker(self, worker_id: int):
-        """Worker function for consuming messages from the AMQP broker.
-        Args:
-            worker_id: The ID of the worker
-        """
-        try:
-            # Connect to the AMQP broker
-            url = f'amqp://{self.username}:{self.password}@{self.host}:{self.port}'
-            conn = BlockingConnection(url, heartbeat=QueueConsumer._heartbeat, timeout=QueueConsumer._timeout)
-            receiver = conn.create_receiver(self.amqp_destination, credit=1)
-            logger.info(f"Connected to the AMQP broker: {url}")
-
-            while True:
-                # Receive a message from the AMQP broker
-                try:
-                    msg = receiver.receive(timeout=QueueConsumer._timeout)
-                    if msg:
-                        logger.info(f"{worker_id} received message-id: {msg.id}")
-                        # Process the message using the message processor
-                        ok = self.message_processor(msg.id, msg.body)
-                        if ok:
-                            receiver.accept()
-                        else:
-                            logger.error(f"{worker_id} message-id: {msg.id} processing failed")
-                            receiver.reject()
-                    else:
-                        logger.info(f"{worker_id} message is empty, message-id: {msg.id}, body: {msg.body}")
-                except Timeout:
-                    logger.debug(f"{worker_id} timed out after {QueueConsumer._timeout} seconds")
-                    continue
-                except Exception as e:
-                    logger.error(f"{worker_id} message-id: {msg.id} error: {e}")
-                    continue
-        except Exception as e:
-            logger.error(f"{worker_id} error: {e}")
-        finally:
-            conn.close()
-            logger.info(f"{worker_id} disconnected from the AMQP broker")
+    def start(self):
+        """Start the consumer. Blocks until the Container stops."""
+        logger.info(f"Starting consumer with {self.num_consumers} concurrent messages")
+        handler = ConsumerHandler(
+            url=self.url,
+            amqp_destination=self.amqp_destination,
+            credit=self.num_consumers,
+            message_processor=self.message_processor,
+        )
+        Container(handler).run()
 
 
 def main():
@@ -89,7 +131,7 @@ def main():
         logger.info(f"Processing message-id: {message_id}, body: {message_body}")
         logger.info("################################################################################")
         return True
-    
+
     try:
         from dotenv import load_dotenv
         # Load environment variables
@@ -105,17 +147,8 @@ def main():
                     f"ADDRESS: {ADDRESS}, QUEUE_NAME: {QUEUE_NAME}, NUM_CONSUMERS: {NUM_CONSUMERS}")
 
         consumer = QueueConsumer(HOST, PORT, USERNAME, PASSWORD, ADDRESS, QUEUE_NAME, NUM_CONSUMERS, message_processor)
+        consumer.start()  # blocks — Container owns the IO loop
 
-        for i in range(NUM_CONSUMERS):
-            thread = threading.Thread(target=consumer.worker, args=(i,), daemon=True, name=f"consumer-worker-{i}")
-            thread.start()
-            logger.info(f"Started consumer-worker-{i}")
-        while True:
-            time.sleep(1)
-    # except KeyboardInterrupt:
-    #     logger.info("Keyboard interrupt received, shutting down...")
-    #     consumer.disconnect()
-    #     sys.exit(0)
     except Exception as e:
         logger.error(f"Error: {e}")
         sys.exit(1)

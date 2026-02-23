@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 import os
 from logger import setup_logging
 import logging
-import threading
-import time
+
 from models import JobMatcherResult
 
 load_dotenv()
@@ -83,12 +82,7 @@ def message_processor(message_id: str, message_body: str) -> bool:
 def main():
     logger.info("Hello from job-matcher!")
     queue_consumer = QueueConsumer(HOST, PORT, USERNAME, PASSWORD, ADDRESS, QUEUE_NAME, NUM_CONSUMERS, message_processor)
-    for i in range(NUM_CONSUMERS):
-        thread = threading.Thread(target=queue_consumer.worker, args=(i,), daemon=True, name=f"queue-consumer-worker-{i}")
-        thread.start()
-        logger.info(f"Started queue-consumer-worker-{i}")
-    while True:
-        time.sleep(1)
+    queue_consumer.start()
  
 
 if __name__ == "__main__":

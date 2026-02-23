@@ -84,10 +84,10 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
         # Detect application status — full page text is the most reliable fallback
         # because LinkedIn frequently renames CSS classes and SDUI components.
         page_text = page.locator("body").inner_text().lower()
-
+        
         if "no longer accepting applications" in page_text:
             status = "closed"
-        elif "application submitted" in page_text or "applied" in page_text:
+        elif "application submitted" in page_text:
             status = "applied"
         else:
             status = "open"
@@ -134,9 +134,9 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
 
 
 def main():
-    #job_url = "https://www.linkedin.com/jobs/view/4328534952/" # job applied
+    job_url = "https://www.linkedin.com/jobs/view/4375302812/" # job applied
     #job_url = "https://www.linkedin.com/jobs/view/4365010800/" # job no longer accepting applications
-    job_url = "https://www.linkedin.com/jobs/view/4374040129/" # job open
+    #job_url = "https://www.linkedin.com/jobs/view/4374040129/" # job open
 
     # First run: set first_login=True to log in manually
     # After that: set first_login=False (session is saved)

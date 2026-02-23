@@ -115,7 +115,7 @@ def match_job(job_url: str) -> JobMatcherResult:
 
 
 def main():
-    job_result = match_job("https://www.linkedin.com/jobs/view/4374040129/")
+    job_result = match_job("https://www.linkedin.com/jobs/view/4375302812/")
     logger.info(f"Job Matcher Result: {job_result}")
 
 if __name__ == "__main__":
