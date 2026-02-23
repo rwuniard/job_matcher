@@ -15,6 +15,8 @@ import logging
 
 from datetime import date
 
+from models import JobMatcherResult
+
 setup_logging()
 logger = logging.getLogger(__name__)
 
@@ -23,13 +25,15 @@ load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 
-def match_job(job_url: str) -> str:
+
+
+def match_job(job_url: str) -> JobMatcherResult:
     """
     Match a job and return the AI response.
     Args:
         job_url: The URL of the job to match.
     Returns:
-        The AI response.
+        A JobMatcherResult object containing the job result and AI response.
     """
     logger.info(f"Matching job-url: {job_url}")
 
@@ -84,46 +88,35 @@ def match_job(job_url: str) -> str:
     job = get_linkedin_job(job_url)
 
  
-    # Check if the job is open, applied, or closed.
-    if job.status == "applied":
-        with open(f"./job_results/{job_id}.applied", "w") as f:
-            f.write(job.description)
-        logger.debug("The candidate has applied to the job.")
-    elif job.status == "closed":
-        with open(f"./job_results/{job_id}.closed", "w") as f:
-            f.write(job.description)
-        logger.debug("The job is closed.")
-    else:
-        job_details_description = job.description
-        job_details_title = job.title
-        
-        # get today's date, so the LLM knows the current date.
-        today_date = date.today()
+    # Short-circuit for jobs that don't need analysis.
+    if job.status in ("applied", "closed"):
+        return JobMatcherResult(job_url=job_url, job_status=job.status, ai_response="")
 
-        user_message = f"""
-        Today's date: {today_date}
-        Conduct a rigorous gap analysis between the following resume and job description.:
+    # get today's date, so the LLM knows the current date.
+    today_date = date.today()
 
-        Resume: {resume}
-        
-        Job Title: {job_details_title}
-        Job Description: {job_details_description}
-        """
-            
-        results = agent.invoke({"messages": [{"role": "user", "content": user_message}]})
-        # for message in results.get("messages"):
-        #     print("Agent response:", message.content)
-        
-        # Get the AI final response and print it
-        ai_response = results.get("messages")[-1].content
-        logger.debug("AI Response:", ai_response)
-        
+    user_message = f"""
+    Today's date: {today_date}
+    Conduct a rigorous gap analysis between the following resume and job description.:
 
-        return ai_response
+    Resume: {resume}
+
+    Job Title: {job.title}
+    Job Description: {job.description}
+    """
+
+    results = agent.invoke({"messages": [{"role": "user", "content": user_message}]})
+
+    ai_response = results.get("messages")[-1].content
+    logger.debug("Job Matcher Result: %s", ai_response)
+
+    return JobMatcherResult(job_url=job_url, job_status=job.status, ai_response=ai_response, job_description=job.description)
+
 
 
 def main():
-    match_job("https://www.linkedin.com/jobs/view/4374040129/")
+    job_result = match_job("https://www.linkedin.com/jobs/view/4374040129/")
+    logger.info(f"Job Matcher Result: {job_result}")
 
 if __name__ == "__main__":
     main()

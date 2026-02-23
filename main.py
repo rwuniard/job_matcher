@@ -7,6 +7,7 @@ from logger import setup_logging
 import logging
 import threading
 import time
+from models import JobMatcherResult
 
 load_dotenv()
 
@@ -37,24 +38,46 @@ def message_processor(message_id: str, message_body: str) -> bool:
         alert = LinkedInJobAlert.model_validate_json(message_body)
         for job in alert.jobs:
             logger.info(f"Processing job-url: {job.url}")
-            ai_response = match_job(job.url)
-            logger.info(f"AI Response: {ai_response}")
+
+            job_matcher_result = match_job(job.url)
+            
+            logger.info(f"Job Matcher Result: {job_matcher_result}")
 
             # Write the AI response to a file.
             # Get the job id from the job url.
             job_id = job.url.rstrip("/").split("/")[-1]
             # Create the job_results directory if it doesn't exist.
             os.makedirs("./job_results", exist_ok=True)
-            with open(f"./job_results/{job_id}.ai_response", "w") as f:
-                f.write(f"Job URL: {job.url}\n")
-                f.write(f"From email subject: {alert.subject}\n")
-                f.write(f"From email date: {alert.date}\n")
-                f.write(f"Job Title: {job.title}\n")
-                f.write(f"AI Response: {ai_response}\n")
-            
+
+            if job_matcher_result.job_status == "applied":
+                with open(f"./job_results/{job_id}.applied", "w") as f:
+                    f.write(f"Job URL: {job.url}\n")
+                    f.write(f"From email subject: {alert.subject}\n")
+                    f.write(f"From email date: {alert.date}\n")
+                    f.write(f"Job Title: {job.title}\n")
+                    f.write(f"You have already applied to this job.")
+                        
+            elif job_matcher_result.job_status == "closed":
+                with open(f"./job_results/{job_id}.closed", "w") as f:
+                    f.write(f"Job URL: {job.url}\n")
+                    f.write(f"From email subject: {alert.subject}\n")
+                    f.write(f"From email date: {alert.date}\n")
+                    f.write(f"Job Title: {job.title}\n")
+                    f.write(f"The job is closed.")
+            elif job_matcher_result.job_status == "open":
+                with open(f"./job_results/{job_id}.ai_response", "w") as f:
+                    f.write(f"Job URL: {job.url}\n")
+                    f.write(f"From email subject: {alert.subject}\n")
+                    f.write(f"From email date: {alert.date}\n")
+                    f.write(f"Job Title: {job.title}\n")
+                    f.write(f"AI Response: {job_matcher_result.ai_response}\n")
+                    f.write(f"\n\nJob description: {job_matcher_result.job_description}\n")
+            else:
+                logger.error(f"Invalid job status: {job_matcher_result.job_status}")
+                return False
         return True
     except Exception as e:
-        print(f"Error processing message-id: {message_id}, body: {message_body}, error: {e}")
+        logger.error(f"Error processing message-id: {message_id}, body: {message_body}, error: {e}")
         return False
 
 def main():
@@ -66,7 +89,7 @@ def main():
         logger.info(f"Started queue-consumer-worker-{i}")
     while True:
         time.sleep(1)
-    #$match_job("https://www.linkedin.com/jobs/view/4333297231/")
+ 
 
 if __name__ == "__main__":
     main()

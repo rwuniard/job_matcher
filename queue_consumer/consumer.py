@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 class QueueConsumer:
     """QueueConsumer class for consuming messages from an AMQP broker."""
-    _heartbeat = 60
-    _timeout = 30
+    _heartbeat = 120
+    _timeout = 60
 
 
     """QueueConsumer class for consuming messages from an AMQP broker."""
