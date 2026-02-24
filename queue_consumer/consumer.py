@@ -75,10 +75,13 @@ class ConsumerHandler(MessagingHandler):
     def on_timer_task(self, _event):
         """Called by Container.schedule() — runs on the IO thread, safe to settle deliveries."""
         with self._lock:
+            # Create a new dictionary with delivery that the result is not None.
             settled = {d: r for d, r in self._pending.items() if r is not None}
+            # remove the deliveries from the pending dictionary, since they are settled.
             for delivery in settled:
                 del self._pending[delivery]
 
+        # Settle the deliveries based on the result.
         for delivery, ok in settled.items():
             if ok:
                 delivery.update(Delivery.ACCEPTED)
