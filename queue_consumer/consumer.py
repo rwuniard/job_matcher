@@ -55,19 +55,36 @@ class ConsumerHandler(MessagingHandler):
         logger.info(f"Received message-id: {msg.id}")
 
         # Register delivery as in-progress before spawning the thread
+        # Lock the _pending dictionary to prevent race conditions between the main thread and the worker thread.
         with self._lock:
+            # Add the delivery to the pending dictionary with a None result.
+            # None means the delivery is in progress.
+            # The _pending dictionary is a way to communicate the result
+            # from the worker thread to the main thread.
+            # It needs to be locked to prevent race conditions between the main thread and the worker thread.
+            # The main thread needs to know when the worker thread has finished processing the message.
+            # The worker thread needs to know when the main thread has settled the delivery.
+            # The _pending dictionary is a way to communicate the result
+            # from the worker thread to the main thread.
             self._pending[delivery] = None
 
         def _process():
             try:
+                # Process the message.
                 ok = self.message_processor(msg.id, msg.body)
             except Exception as e:
+                # If an exception is raised, set the result to False.
                 logger.error(f"message-id: {msg.id} processing raised exception: {e}")
                 ok = False
 
             # Store result and schedule settlement back onto the IO thread
+            # Lock the _pending dictionary to prevent race conditions between the main thread and the worker thread.
             with self._lock:
+                # Store the result in the pending dictionary.
+                # The _pending dictionary is a way to communicate the result
+                # from the worker thread to the main thread.
                 self._pending[delivery] = ok
+            # Schedule the settlement back onto the IO thread.
             event.container.schedule(0, self)
 
         threading.Thread(target=_process, daemon=True).start()
