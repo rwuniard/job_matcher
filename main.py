@@ -33,20 +33,23 @@ def message_processor(message_id: str, message_body: str) -> bool:
     Returns:
         True if the message was processed successfully, False otherwise
     """
+    # Parse the envelope once — if this fails the message is genuinely malformed.
     try:
         alert = LinkedInJobAlert.model_validate_json(message_body)
-        for job in alert.jobs:
-            logger.info(f"Processing job-url: {job.url}")
+    except Exception as e:
+        logger.error(f"Error parsing message-id: {message_id}, error: {e}")
+        return False
 
+    os.makedirs("./job_results", exist_ok=True)
+
+    for job in alert.jobs:
+        # Each job is independent — one failure must not affect the others.
+        try:
+            logger.info(f"Processing job-url: {job.url}")
             job_matcher_result = match_job(job.url)
-            
             logger.info(f"Job Matcher Result: {job_matcher_result}")
 
-            # Write the AI response to a file.
-            # Get the job id from the job url.
             job_id = job.url.rstrip("/").split("/")[-1]
-            # Create the job_results directory if it doesn't exist.
-            os.makedirs("./job_results", exist_ok=True)
 
             if job_matcher_result.job_status == "applied":
                 with open(f"./job_results/{job_id}.applied", "w") as f:
@@ -55,7 +58,7 @@ def message_processor(message_id: str, message_body: str) -> bool:
                     f.write(f"From email date: {alert.date}\n")
                     f.write(f"Job Title: {job.title}\n")
                     f.write(f"You have already applied to this job.")
-                        
+
             elif job_matcher_result.job_status == "closed":
                 with open(f"./job_results/{job_id}.closed", "w") as f:
                     f.write(f"Job URL: {job.url}\n")
@@ -63,6 +66,7 @@ def message_processor(message_id: str, message_body: str) -> bool:
                     f.write(f"From email date: {alert.date}\n")
                     f.write(f"Job Title: {job.title}\n")
                     f.write(f"The job is closed.")
+
             elif job_matcher_result.job_status == "open":
                 with open(f"./job_results/{job_id}.ai_response", "w") as f:
                     f.write(f"Job URL: {job.url}\n")
@@ -71,13 +75,18 @@ def message_processor(message_id: str, message_body: str) -> bool:
                     f.write(f"Job Title: {job.title}\n")
                     f.write(f"AI Response: {job_matcher_result.ai_response}\n")
                     f.write(f"\n\nJob description: {job_matcher_result.job_description}\n")
+
             else:
-                logger.error(f"Invalid job status: {job_matcher_result.job_status}")
-                return False
-        return True
-    except Exception as e:
-        logger.error(f"Error processing message-id: {message_id}, body: {message_body}, error: {e}")
-        return False
+                # Bug 3 fix: log and continue; don't abandon remaining jobs in the loop.
+                logger.error(f"Invalid job status: {job_matcher_result.job_status} for {job.url}")
+
+        except Exception as e:
+            # Bug 2 fix: log and continue to the next job.
+            # Returning False here would reject the whole message, causing all already-processed
+            # jobs in this email to be rerun with no idempotency protection.
+            logger.error(f"Error processing job-url: {job.url}, error: {e}")
+
+    return True
 
 def main():
     logger.info("Hello from job-matcher!")

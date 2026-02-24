@@ -90,6 +90,7 @@ def match_job(job_url: str) -> JobMatcherResult:
  
     # Short-circuit for jobs that don't need analysis.
     if job.status in ("applied", "closed"):
+        print("The candidate has applied to the job or the job is closed.")
         return JobMatcherResult(job_url=job_url, job_status=job.status, ai_response="")
 
     # get today's date, so the LLM knows the current date.
@@ -109,6 +110,7 @@ def match_job(job_url: str) -> JobMatcherResult:
 
     ai_response = results.get("messages")[-1].content
     logger.debug("Job Matcher Result: %s", ai_response)
+    print(f"AI Response: {ai_response}")
 
     return JobMatcherResult(job_url=job_url, job_status=job.status, ai_response=ai_response, job_description=job.description)
 
