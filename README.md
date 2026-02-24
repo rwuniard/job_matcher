@@ -105,7 +105,11 @@ Results are saved to `./job_results/` with the job ID as the filename:
 ## Running Tests
 
 ```bash
-uv run --extra dev pytest -q
+# Install dev dependencies (first time only)
+uv sync --extra dev
+
+# Run all tests
+uv run pytest -v
 ```
 
 Current unit tests cover:
