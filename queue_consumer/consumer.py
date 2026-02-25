@@ -9,7 +9,7 @@ from proton import Delivery
 from proton.handlers import MessagingHandler
 from proton.reactor import Container
 
-from .message_processor import MessageProcessor
+from .message_processor import MessageProcessor, ProcessingResult
 
 # Setup logging
 setup_logging()
@@ -27,11 +27,11 @@ class ConsumerHandler(MessagingHandler):
     """
 
     def __init__(self, url: str, amqp_destination: str, credit: int, message_processor: MessageProcessor):
-        super().__init__(prefetch=credit)
+        super().__init__(prefetch=credit, auto_accept=False)
         self.url = url
         self.amqp_destination = amqp_destination
         self.message_processor = message_processor
-        self._pending: dict[object, bool | None] = {}  # delivery → result (None = in-progress)
+        self._pending: dict[object, ProcessingResult | None] = {}  # delivery → result (None = in-progress)
         self._lock = threading.Lock()
 
     # ── Container lifecycle ────────────────────────────────────────────────
@@ -70,21 +70,13 @@ class ConsumerHandler(MessagingHandler):
 
         def _process():
             try:
-                # Process the message.
-                ok = self.message_processor(msg.id, msg.body)
+                result = self.message_processor(msg.id, msg.body)
             except Exception as e:
-                # If an exception is raised, set the result to False.
                 logger.error(f"message-id: {msg.id} processing raised exception: {e}")
-                ok = False
+                result = ProcessingResult.RELEASED
 
-            # Store result and schedule settlement back onto the IO thread
-            # Lock the _pending dictionary to prevent race conditions between the main thread and the worker thread.
             with self._lock:
-                # Store the result in the pending dictionary.
-                # The _pending dictionary is a way to communicate the result
-                # from the worker thread to the main thread.
-                self._pending[delivery] = ok
-            # Schedule the settlement back onto the IO thread.
+                self._pending[delivery] = result
             event.container.schedule(0, self)
 
         threading.Thread(target=_process, daemon=True).start()
@@ -98,14 +90,16 @@ class ConsumerHandler(MessagingHandler):
             for delivery in settled:
                 del self._pending[delivery]
 
-        # Settle the deliveries based on the result.
-        for delivery, ok in settled.items():
-            if ok:
+        for delivery, result in settled.items():
+            if result == ProcessingResult.ACCEPTED:
                 delivery.update(Delivery.ACCEPTED)
                 logger.info(f"Accepted delivery: {delivery.tag}")
+            elif result == ProcessingResult.RELEASED:
+                delivery.update(Delivery.RELEASED)
+                logger.warning(f"Released delivery for redelivery: {delivery.tag}")
             else:
                 delivery.update(Delivery.REJECTED)
-                logger.error(f"Rejected delivery: {delivery.tag}")
+                logger.error(f"Rejected delivery to DLQ: {delivery.tag}")
             delivery.settle()
 
 

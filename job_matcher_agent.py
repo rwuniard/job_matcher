@@ -8,7 +8,6 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from get_resume import get_resume
 
 from linkedin_loader_private import get_linkedin_job
-#from linkedin_loader import get_linkedin_job_public
 
 from logger import setup_logging
 import logging
@@ -17,10 +16,9 @@ from datetime import date
 
 from models import JobMatcherResult
 
+load_dotenv()
 setup_logging()
 logger = logging.getLogger(__name__)
-
-load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 

@@ -1,0 +1,450 @@
+2026-02-25 16:28:33 - logger.logger_config - INFO - Logging configured
+2026-02-25 16:28:33 - __main__ - INFO - Hello from job-matcher!
+2026-02-25 16:28:33 - queue_consumer.consumer - INFO - Starting consumer with 5 concurrent messages
+2026-02-25 16:28:33 - queue_consumer.consumer - INFO - Connected to the AMQP broker: amqp://artemis:artemis@localhost:5672
+2026-02-25 16:28:33 - proton - INFO - Connecting to Url('amqp://artemis:artemis@localhost:5672')...
+2026-02-25 16:28:33 - proton - INFO - Connected to localhost
+2026-02-25 16:28:40 - queue_consumer.consumer - INFO - Received message-id: d4d08caa-a718-4268-8169-ffbe1ae5ab03
+2026-02-25 16:28:40 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4376861690/
+2026-02-25 16:28:40 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4376861690/
+2026-02-25 16:28:40 - queue_consumer.consumer - INFO - Received message-id: 1c1898a4-a5a7-45fb-bde0-fbf64647154e
+2026-02-25 16:28:40 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4374517575/
+2026-02-25 16:28:40 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4374517575/
+2026-02-25 16:28:40 - queue_consumer.consumer - INFO - Received message-id: 2d0e902a-c487-409a-a81b-52511cbcad27
+2026-02-25 16:28:40 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4354441819/
+2026-02-25 16:28:40 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4354441819/
+2026-02-25 16:28:40 - queue_consumer.consumer - INFO - Received message-id: a31fe756-bb61-4c89-b42d-af7b124815f9
+2026-02-25 16:28:40 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4344160294/
+2026-02-25 16:28:40 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4344160294/
+2026-02-25 16:28:44 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:28:48 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:28:51 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:28:55 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:28:57 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:28:57 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4374517575/, ai_response=*   **Overall Match Score:** 3/10
+*   **Domain Taxonomy:** ML/AI (Candidate) vs ML/AI (JD) - **Match**
+*   **Logistics Status:** Suwanee, GA (Candidate) vs Hybrid in Atlanta, GA (Buckhead) (JD) - **Mismatch**
+*   **Recency Check:** Pass (Candidate has managed relevant domain within 5 years and leadership within 10 years)
+*   **Strict Reason for Score:** The candidate demonstrates a strong, recent domain match in ML/AI engineering leadership, with highly relevant experience in multi-agent systems, RAG, LLM integrations, and cloud platforms. However, the Job Description explicitly states a "Hybrid in Buckhead (Atlanta, GA)" work mode, valuing "in-person collaboration" for a foundational role. The candidate's location in Suwanee, GA, while in the broader Atlanta metropolitan area, constitutes a significant commute (approx. 30-40 miles) and a logistical mismatch for a hybrid role requiring consistent presence in a specific Atlanta neighborhood. This location mismatch triggers a "Hard Fail" under the strict domain and logistics exclusion policy, limiting the maximum possible score to 3, despite strong technical alignment.
+*   **Top 3 Relevant Assets (must be < 5 years old):**
+    1.  **Independent Consultant – AI Engineering (July 2025 – Sep 2025):** Architected enterprise-grade RAG platform, built MCP-based interoperability for multi-agent workflows, and designed scalable ingestion pipelines. Directly aligns with the JD's core AI platform and multi-agent architecture.
+    2.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Led distributed engineering teams, drove Kubernetes migration, matured CI/CD pipelines, implemented observability, and enhanced productivity using AI-driven development tooling. Demonstrates leadership in scaling platforms and adopting AI tools.
+    3.  **Core Competencies in AI & Advanced Technologies:** Explicitly lists RAG, LangChain, LangGraph, MCP, LLM Integrations (OpenAI, Claude, Gemini), Vector Databases (Chroma DB), and Agentic Architectures, which are direct requirements for the Peach Pilot platform.
+*   **Top 3 Gaps/Irrelevancies:**
+    1.  **Location Mismatch for Hybrid Role:** The primary gap is the candidate's location in Suwanee, GA, for a hybrid role explicitly requiring presence in Buckhead, Atlanta, which is a hard logistical exclusion for a role emphasizing in-person collaboration.
+    2.  **Azure Depth:** While the candidate lists Azure experience (older migration), the JD specifically asks for "Cloud-native architecture depth on Azure (or strong AWS/GCP with genuine interest in Azure)." The resume doesn't highlight recent, deep Azure expertise compared to AWS/GCP.
+    3.  **Regulated Financial Services Experience:** The JD heavily emphasizes experience in "regulated financial services, fintech, or regulated industries where compliance isn’t a checkbox." While the candidate has broad industry experience (eCommerce, healthcare, SaaS), direct, recent leadership experience in the highly regulated financial sector is not explicitly detailed.)
+2026-02-25 16:28:57 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4375797219/
+2026-02-25 16:28:57 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4375797219/
+2026-02-25 16:29:00 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:29:05 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:29:05 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4376861690/, ai_response=**Overall Match Score: 3/10**
+
+**Domain Taxonomy:** AI/ML Engineering & General Product/AppDev (Kubernetes/DevOps) vs Product/AppDev (AWS-centric Digital Health)
+**Logistics Status:** Candidate Location: Suwanee, GA vs JD Location/Work Mode: Not Specified (No Mismatch)
+**Recency Check:** Fail (for specific domain expertise within 5 years)
+
+**Strict Reason for Score:**
+This is a hard fail due to a significant domain mismatch. The Job Description explicitly seeks a Senior Manager for "AWS Development (Digital Health)" with deep expertise in specific AWS cloud-native services (Lambda, DynamoDB, SQS/SNS, etc.), Python, and experience in regulated healthcare environments (HIPAA). The candidate's most recent and prominent experience (last 5 years) is heavily focused on "AI Engineering" (RAG, LLMs, Vector Databases) and general Product/AppDev with Kubernetes/DevOps in eCommerce and auction technology. While the candidate possesses strong general engineering leadership and some cloud/DevOps skills, the core domain of AWS-centric application development in Digital Health is not demonstrated with sufficient depth or recency. The AI focus is a strong divergence from the JD's primary requirements.
+
+**Top 3 Relevant Assets (Must be < 5 years old):**
+1.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Demonstrates strong leadership of distributed engineering teams, experience with Kubernetes migration, CI/CD maturity, and implementing observability, which are transferable skills for a senior manager role.
+2.  **Manager, Software Engineering – The Home Depot (Oct 2018 – May 2022):** Shows experience owning engineering for high-traffic eCommerce platforms, unifying systems, and driving platform hardening and monitoring, indicating capability in managing large-scale product delivery.
+3.  **Cloud & Platform Engineering Competencies:** Lists general AWS experience, Kubernetes, Docker, Microservices, CI/CD, and Observability, which are foundational for the role, though lacking the specific AWS service depth required.
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Primary Domain Mismatch (AI Engineering vs. AWS Development):** The candidate's recent focus on AI Engineering (RAG, LLMs, LangChain, Chroma DB) is not aligned with the JD's core requirement for deep AWS cloud-native application development.
+2.  **Lack of Deep, Specific AWS Cloud-Native Development Expertise:** The resume does not demonstrate the explicit, in-depth experience with the specific AWS services (e.g., Lambda, API Gateway, DynamoDB, SQS/SNS, EventBridge, CloudFront, RDS/Aurora, IAM) and Python proficiency for application development that the JD mandates.
+3.  **Missing Digital Health & Regulated Environment Experience:** There is no mention of experience in the digital health sector or with regulated environments (HIPAA, SOC 2, HITRUST), which is a critical requirement for this role.)
+2026-02-25 16:29:05 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4354441819/
+2026-02-25 16:29:05 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4354441819/
+2026-02-25 16:29:09 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:29:15 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:29:15 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4344160294/, ai_response=**Overall Match Score: 9/10**
+
+**Domain Taxonomy:** Candidate Domain: Product/AppDev (with strong ML/AI specialization) vs JD Domain: Product/AppDev
+**Logistics Status:** Candidate Location: Suwanee, GA vs JD Location/Work Mode: Remote-eligible (Match)
+**Recency Check:** Pass (Candidate has managed the specific domain in the last 5 years; leadership experience within 10 years is credited).
+
+**Strict Reason for Score:**
+Excellent alignment in primary domain, with the candidate demonstrating extensive and recent (within the last 5 years) leadership experience in Product/AppDev, specifically in scaling high-traffic eCommerce, mobile, and platform environments. The candidate's track record of managing multiple engineering teams, driving operational excellence, and delivering significant business outcomes directly aligns with the JD's requirements for a Director of Software Engineering. The perfect match on remote logistics further strengthens the candidacy. The strong AI/Cloud transformation expertise is a significant value-add, showcasing innovation and modern technology adoption, which aligns with the JD's emphasis on "best in class technologies."
+
+**Top 3 Relevant Assets (Must be < 5 years old):**
+1.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Led distributed engineering teams for large-scale auction, mobile, and payments platforms; increased engineering predictability by 33%; led Kubernetes migration; and improved release cadence from bi-weekly to daily. This demonstrates direct, recent leadership in scaling and optimizing product delivery for high-demand customer-facing applications.
+2.  **Manager, Software Engineering – The Home Depot (Oct 2018 – May 2022):** Owned engineering for high-traffic eCommerce HD-Pro websites and mobile applications; unified multiple platforms; reduced system maintenance costs by 50%; and achieved zero production failures in 2020. This showcases critical experience in managing large-scale eCommerce platforms, ensuring reliability, and driving cost efficiency.
+3.  **AI & Advanced Technologies / AI Engineering Tools (July 2025 – Sep 2025 & ongoing competency):** Demonstrated expertise in RAG, LangChain, LLM Integrations, Agentic Architectures, and AI-driven development tooling (Cursor, GitHub Copilot). This highlights a commitment to innovation and leveraging cutting-edge technologies to enhance productivity and build advanced platforms, aligning with the JD's desire for "best in class technologies."
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Most recent role as Independent AI Engineering Consultant (July 2025 – Sep 2025):** While showcasing cutting-edge skills, this was a short-term consultant role primarily focused on ML/AI, not a sustained, direct Product/AppDev leadership position immediately preceding the current date.
+2.  **Lack of explicit "Director" title in recent roles:** Although the scope of responsibilities (e.g., leading distributed teams across continents, owning engineering for high-traffic eCommerce) clearly aligns with Director-level expectations, the candidate's recent titles are "Senior Engineering Manager" or "Manager, Software Engineering."
+3.  **Leadership experience prior to 2016:** While extensive and foundational, management experience older than 10 years (e.g., early McKesson roles) is not given credit for leadership impact per the rubric's recency constraint.)
+2026-02-25 16:29:15 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4341135565/
+2026-02-25 16:29:15 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4341135565/
+2026-02-25 16:29:17 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:29:17 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4354441819/, ai_response=**Overall Match Score: 9/10**
+
+**Domain Taxonomy:**
+*   Candidate Domain: Product/AppDev, Cloud/Platform, ML/AI
+*   JD Domain: Product/AppDev, Cloud/Platform, ML/AI (knowledge of)
+
+**Logistics Status:**
+*   Candidate Location: Suwanee, GA (with recent remote experience)
+*   JD Location/Work Mode: Not specified (assumed remote-eligible due to ambiguity and candidate's remote history) - **Match**
+
+**Recency Check:** Pass for 5/10 year rules (significant leadership and technical impact within the last 5 years).
+
+**Strict Reason for Score:**
+This candidate presents an exceptionally strong match for the Software Engineering Manager role. There is a clear and direct alignment in the primary domain, encompassing Product/AppDev, Cloud/Platform, and a significant, relevant depth in ML/AI that exceeds the JD's "knowledge of" requirement. The candidate's recent leadership experience (within the last 5 years) directly addresses the JD's core responsibilities, including agile delivery, technical leadership, and stakeholder management, with demonstrable impact. The location is considered a match due to the JD's lack of explicit location requirement and the candidate's proven track record in remote leadership roles. The score reflects a near-ideal fit, with minor deductions for specific technology mentions not explicitly detailed in the resume.
+
+**Top 3 Relevant Assets (Must be < 5 years old):**
+1.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Led distributed teams, increased engineering predictability by 33%, led Kubernetes migration, improved release cadence to daily, implemented observability, and enhanced productivity with AI-driven development tooling. This directly aligns with the JD's emphasis on team leadership, agile delivery, technical leadership (CI/CD, DevOps, AWS/K8s), and innovation.
+2.  **Independent Consultant – AI Engineering (July 2025 – Sep 2025):** Architected an enterprise-grade RAG platform, built MCP-based interoperability for multi-LLM orchestration, and designed scalable ingestion pipelines. This demonstrates deep, hands-on expertise in AI/ML, directly addressing and exceeding the JD's "Knowledge of AI/ML" requirement and showcasing innovation.
+3.  **Manager, Software Engineering – The Home Depot (Oct 2018 – May 2022):** Owned engineering for high-traffic eCommerce platforms, unified multiple platforms, reduced system maintenance costs by 50%, achieved zero production failures, and implemented robust monitoring and security. This showcases strong product engineering leadership, architectural contribution, and a track record of delivering quality and impact in a fast-paced environment.
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Specific Mobile Technologies & IoT:** While the candidate has general mobile experience, the JD specifically mentions "React Native, iOS, Android" and "offline-first architecture and integration with IoT," which are not explicitly detailed in the resume.
+2.  **Industry-Specific Domain Knowledge:** The candidate's experience spans eCommerce, auction, healthcare, and legal tech. The JD is for a "farm management solutions" company, and direct industry experience in agriculture/dairy is not present.
+3.  **Older Management Experience:** Management roles prior to 2017 (e.g., McKesson Technology Solutions) fall outside the 10-year recency window for management credit, making their specific accomplishments less impactful for this evaluation, though they provide foundational career context.)
+2026-02-25 16:29:17 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4368418168/
+2026-02-25 16:29:17 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4368418168/
+2026-02-25 16:29:18 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:29:22 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:29:22 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4375797219/, ai_response=**Overall Match Score: 3/10**
+
+**Domain Taxonomy:** Candidate (Product/AppDev, AI/Cloud within AppDev) vs JD (Product/AppDev, Payments Platforms) - **Match**
+
+**Logistics Status:** Candidate (Suwanee, GA) vs JD (Hybrid, *unspecified city*). **Mismatch** (Cannot confirm locality to an unspecified hybrid office location).
+
+**Recency Check:** Pass (All key leadership and domain-specific experience is within the last 5 years, and relevant management experience is within 10 years).
+
+**Strict Reason for Score:** The candidate presents an excellent domain match with extensive, recent leadership experience in Product/AppDev, distributed systems, payments, and AI integration, directly aligning with the JD's technical and leadership requirements. However, the Job Description specifies a "hybrid" work mode without explicitly stating the required office location. Given the candidate's location in Suwanee, GA, and the critical absence of a specified city in the JD for a hybrid role, a strict interpretation leads to a logistical mismatch. This triggers a "Hard Fail" under the "Strict Domain & Logistics Exclusion" policy, limiting the maximum possible score to 3, despite the strong technical and leadership alignment. Without a confirmed local office for the hybrid role, the candidate cannot be considered.
+
+**Top 3 Relevant Assets (all < 5 years old):**
+1.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Led distributed teams building large-scale auction and payments platforms, integrated ATG Pay, led Kubernetes migration, improved CI/CD, implemented observability, and enhanced productivity with AI-driven tooling. This experience is highly relevant to the JD's focus on payments, distributed systems, and engineering excellence.
+2.  **Independent Consultant – AI Engineering (July 2025 – Sep 2025):** Architected an enterprise-grade RAG platform and built multi-LLM interoperability. This directly addresses the JD's "Preferred Qualification" for experience integrating generative AI into engineering workflows to improve productivity.
+3.  **Manager, Software Engineering – The Home Depot (Oct 2018 – May 2022):** Owned engineering for high-traffic eCommerce websites and mobile applications, unified platforms, reduced system maintenance costs, and strengthened security posture. Demonstrates leadership in high-scale, secure application development within a relevant domain.
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Logistical Mismatch (Primary Gap):** The JD requires a hybrid work mode but critically fails to specify the required office location. The candidate is located in Suwanee, GA, making it impossible to confirm local alignment for an unspecified hybrid role, resulting in a hard logistical exclusion.
+2.  **Lack of Explicit Commercial Card Platform Experience:** While the candidate has recent payments platform experience (Auction Technology Group), the JD specifically mentions "commercial card platforms." This is a minor, but notable, area where direct experience is not explicitly stated.
+3.  **Management Experience Older Than 10 Years:** Per the rubric, management experience older than 10 years (e.g., portions of the McKesson role from 2011-2017) receives no credit, making it irrelevant for scoring purposes, though the candidate's recent experience is robust.)
+2026-02-25 16:29:22 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4361245726/
+2026-02-25 16:29:22 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4361245726/
+2026-02-25 16:29:22 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:29:26 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:29:31 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:29:31 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4354441819/, ai_response=**Overall Match Score: 9/10**
+
+**Domain Taxonomy:**
+*   Candidate Domain: Product/AppDev, Cloud/Platform, ML/AI
+*   JD Domain: Product/AppDev, Cloud/Platform, ML/AI (knowledge of)
+
+**Logistics Status:**
+*   Candidate Location: Suwanee, GA (with recent remote experience)
+*   JD Location/Work Mode: Not specified (assumed remote-eligible due to ambiguity and candidate's remote history) - **Match**
+
+**Recency Check:** Pass for 5/10 year rules (significant leadership and technical impact within the last 5 years).
+
+**Strict Reason for Score:**
+This candidate presents an exceptionally strong match for the Software Engineering Manager role. There is a clear and direct alignment in the primary domain, encompassing Product/AppDev, Cloud/Platform, and a significant, relevant depth in ML/AI that exceeds the JD's "knowledge of" requirement. The candidate's recent leadership experience (within the last 5 years) directly addresses the JD's core responsibilities, including agile delivery, technical leadership, and stakeholder management, with demonstrable impact. The location is considered a match due to the JD's lack of explicit location requirement and the candidate's proven track record in remote leadership roles. The score reflects a near-ideal fit, with minor deductions for specific technology mentions not explicitly detailed in the resume.
+
+**Top 3 Relevant Assets (Must be < 5 years old):**
+1.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Led distributed teams, increased engineering predictability by 33%, led Kubernetes migration, improved release cadence to daily, implemented observability, and enhanced productivity with AI-driven development tooling. This directly aligns with the JD's emphasis on team leadership, agile delivery, technical leadership (CI/CD, DevOps, AWS/K8s), and innovation.
+2.  **Independent Consultant – AI Engineering (July 2025 – Sep 2025):** Architected an enterprise-grade RAG platform, built MCP-based interoperability for multi-LLM orchestration, and designed scalable ingestion pipelines. This demonstrates deep, hands-on expertise in AI/ML, directly addressing and exceeding the JD's "Knowledge of AI/ML" requirement and showcasing innovation.
+3.  **Manager, Software Engineering – The Home Depot (Oct 2018 – May 2022):** Owned engineering for high-traffic eCommerce platforms, unified multiple platforms, reduced system maintenance costs by 50%, achieved zero production failures, and implemented robust monitoring and security. This showcases strong product engineering leadership, architectural contribution, and a track record of delivering quality and impact in a fast-paced environment.
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Specific Mobile Technologies & IoT:** While the candidate has general mobile experience, the JD specifically mentions "React Native, iOS, Android" and "offline-first architecture and integration with IoT," which are not explicitly detailed in the resume.
+2.  **Industry-Specific Domain Knowledge:** The candidate's experience spans eCommerce, auction, healthcare, and legal tech. The JD is for a "farm management solutions" company, and direct industry experience in agriculture/dairy is not present.
+3.  **Older Management Experience:** Management roles prior to 2017 (e.g., McKesson Technology Solutions) fall outside the 10-year recency window for management credit, making their specific accomplishments less impactful for this evaluation, though they provide foundational career context.)
+2026-02-25 16:29:31 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4368050447/
+2026-02-25 16:29:31 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4368050447/
+2026-02-25 16:29:35 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:29:39 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:29:39 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4368418168/, ai_response=*   **Overall Match Score:** 3/10
+*   **Domain Taxonomy:** ML/AI (Candidate) vs ML/AI (JD)
+*   **Logistics Status:** Suwanee, GA (Candidate) vs Implied On-site/Hybrid (JD - due to "Company paid commuter benefit" and no explicit "Remote" designation, likely Denver, CO where Crusoe is headquartered) - **Location Mismatch**
+*   **Recency Check:** Pass (for both 5-year domain management and 10-year leadership rules)
+*   **Strict Reason for Score:** The primary reason for the low score is a **Logistics Hard Fail**. The Job Description implies an on-site or hybrid work mode through the inclusion of a "Company paid commuter benefit" and does not explicitly state "Remote." The candidate is located in Suwanee, GA, which constitutes a significant geographic mismatch with Crusoe's likely office locations (e.g., Denver, CO). Per the "Strict Domain & Logistics Exclusion" policy, a location mismatch results in a maximum possible score of 3, regardless of strong domain alignment or recent experience.
+*   **Top 3 Relevant Assets (all < 5 years old):**
+    1.  **Independent Consultant – AI Engineering (Jul 2025 – Sep 2025):** Directly relevant experience in architecting enterprise-grade RAG platforms, building MCP-based interoperability for multi-agent workflows, and designing scalable ingestion pipelines, aligning perfectly with the JD's focus on agent scaffolding and LLM-based agentic systems.
+    2.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Demonstrated leadership in improving CI/CD pipelines, implementing observability stacks (Grafana, Prometheus, Dynatrace), and enhancing productivity using AI-driven development tooling, which directly supports the JD's requirements for a unified observability layer and workflow optimization.
+    3.  **Core Competency in AI & Advanced Technologies:** Explicitly lists expertise in RAG, LangChain, LangGraph, MCP, LLM Integrations (OpenAI, Claude, Gemini), Vector Databases (Chroma DB), and Agentic Architectures, which is a direct and critical requirement for the role.
+*   **Top 3 Gaps/Irrelevancies:**
+    1.  **Location Mismatch:** Candidate's location in Suwanee, GA, is not aligned with the JD's implied on-site/hybrid requirement, leading to a hard fail.
+    2.  **Limited explicit recent AI Security/Privacy focus:** While the candidate has general security experience, the JD places a strong emphasis on "AI security, debugability, and privacy" and "Secure architecture that ensures proper data handling and sandboxing for headless agent execution." Recent AI roles do not explicitly detail specific security measures for agentic systems.
+    3.  **Experience with specialized cloud provider infrastructure:** The JD mentions leveraging "Crusoe's infrastructure as a cloud provider to retain an edge in the agent space." The candidate's experience is primarily building *on* major cloud platforms (AWS, GCP, Azure) rather than managing or optimizing the unique aspects of a specialized cloud provider's underlying infrastructure for AI.)
+2026-02-25 16:29:39 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4377093124/
+2026-02-25 16:29:39 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4377093124/
+2026-02-25 16:29:43 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:29:43 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:29:43 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4341135565/, ai_response=**Overall Match Score: 6/10**
+
+**Domain Taxonomy:**
+*   Candidate Domain: Product/AppDev, Infrastructure/Platform, ML/AI (recent)
+*   JD Domain: Product/AppDev, Infrastructure/Platform
+
+**Logistics Status:**
+*   Candidate Location: Suwanee, GA (USA)
+*   JD Location/Work Mode: Remote (USA, DR, Canada)
+*   Status: Match
+
+**Recency Check:** Pass (Candidate has managed relevant domains within the last 5 years, and leadership experience older than 10 years is not credited).
+
+**Strict Reason for Score:**
+The candidate demonstrates strong, recent leadership in Product/AppDev and Infrastructure/Platform, which aligns well with the JD's core technical domain and remote work model. However, the JD explicitly requires "Direct experience operating within the regulated Financial Services or high-growth FinTech industry" and specific experience with Salesforce or managing teams responsible for it. These are critical contextual requirements for a Director-level role in this specific company that the candidate lacks, preventing an "Ideal Match" score.
+
+**Top 3 Relevant Assets (must be < 5 years old):**
+1.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Led distributed teams, Kubernetes migration, CI/CD maturity, observability, and AI-driven development tooling, directly aligning with JD's technical leadership and platform scaling needs.
+2.  **Manager, Software Engineering – The Home Depot (Oct 2018 – May 2022):** Owned engineering for high-traffic eCommerce, platform unification, cost reduction, and system hardening, demonstrating leadership in core application development and business value delivery.
+3.  **Core Competencies in Cloud & Platform Engineering:** Extensive experience with AWS, GCP, Azure, Kubernetes, Docker, Microservices, CI/CD, and Observability, providing a strong technical foundation for architectural guidance.
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Lack of Direct FinTech Industry Experience:** The candidate's background is in eCommerce, healthcare, SaaS, and marketplace, but not the "regulated Financial Services or high-growth FinTech industry" explicitly required by the JD.
+2.  **No Salesforce Experience:** The JD specifically asks for "Familiarity with Salesforce and experience managing or interacting with the platform," which is not present on the resume.
+3.  **AI Experience Mismatch:** While the candidate has very recent and advanced AI engineering experience, the JD's mention of AI is primarily for "AI-assisted development practices" (tools for engineers), making the candidate's deep AI product/platform building expertise less directly relevant to the *leadership scope* of this specific Director role.)
+2026-02-25 16:29:43 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4368350629/
+2026-02-25 16:29:43 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4368350629/
+2026-02-25 16:29:47 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:29:48 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:29:48 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4368050447/, ai_response=**Overall Match Score:** 3/10
+
+**Domain Taxonomy:** Candidate: Product/AppDev (eCommerce, Auction, AI Engineering) vs JD: Product/AppDev (Fleet Management, Logistics, Backend Services) - **Strong Domain Match**
+
+**Logistics Status:** Candidate: Suwanee, GA vs JD: Hybrid (3 days in office, likely Pittsburgh/Mountain View/Bozeman) - **Location Mismatch**
+
+**Recency Check:** Pass (Relevant leadership and accomplishments within 5 years)
+
+**Strict Reason for Score:** The candidate presents an excellent domain match with strong, recent leadership experience in large-scale Product/AppDev, cloud, and distributed systems. However, the **critical location mismatch** for a hybrid role, where the candidate is not local to any of the company's office hubs, triggers a hard fail, limiting the maximum possible score to 3.
+
+**Top 3 Relevant Assets (all < 5 years old):**
+1.  Led distributed engineering teams for large-scale auction, mobile, and payments platforms, including Kubernetes migration, CI/CD maturity, and observability implementation (Auction Technology Group, Dec 2022 – Jul 2025).
+2.  Owned engineering for high-traffic eCommerce websites and mobile applications, achieving zero production failures and implementing robust monitoring and security (The Home Depot, Oct 2018 – May 2022).
+3.  Deep expertise in cloud backend development, scalable web services, and distributed systems, demonstrated across multiple recent leadership roles.
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Location Mismatch:** Candidate is based in Suwanee, GA, which is not local to Aurora's hybrid office locations (e.g., Pittsburgh, Mountain View, Bozeman). This is a hard fail.
+2.  While the candidate has strong general Product/AppDev experience, there is no explicit experience in transportation, logistics, or autonomous vehicle fleet management, which are desirable qualifications for this specific role.
+3.  The recent Independent Consultant – AI Engineering role (July 2025 – Sep 2025) is a slight domain deviation from the core Product/AppDev focus of the JD, though it showcases advanced technical skills.)
+2026-02-25 16:29:48 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4368041617/
+2026-02-25 16:29:48 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4368041617/
+2026-02-25 16:29:50 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:29:50 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4361245726/, ai_response=*   **Overall Match Score:** 10/10
+*   **Domain Taxonomy:** Candidate Domain: Product/AppDev, Infrastructure/Platform, ML/AI vs JD Domain: Infrastructure/Platform (with strong SRE, Product/AppDev, and Data/AI Integration)
+*   **Logistics Status:** Candidate Location: Suwanee, GA vs JD Location/Work Mode: Hybrid, Atlanta, GA (Match)
+*   **Recency Check:** Pass (Leadership impact and domain experience within the last 5 years)
+*   **Strict Reason for Score:** This candidate presents an ideal match. The core of the JD is Sr Director Software Engineering- SRE, emphasizing SRE, Platform Engineering, Cloud/Infrastructure, and Application Development, with a component of Data/AI integration. The candidate's experience as Senior Engineering Manager at Auction Technology Group (Dec 2022 – Jul 2025) directly aligns with leading Kubernetes migration, improving CI/CD, implementing observability, and scaling platforms. Their role at The Home Depot (Oct 2018 – May 2022) further solidifies their expertise in high-traffic eCommerce application development, platform unification, and security. The recent Independent Consultant – AI Engineering role (Jul 2025 – Sep 2025) provides specific, hands-on credibility for the JD's "Data & AI Integration" requirements, demonstrating leadership in modern AI application. All critical leadership and technical impact are well within the last 5 years. Furthermore, the candidate's location in Suwanee, GA, is a perfect match for the hybrid Atlanta, GA requirement.
+*   **Top 3 Relevant Assets:**
+    1.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Led distributed teams, increased predictability by 33%, led Kubernetes migration, improved release cadence (bi-weekly to daily) via CI/CD, and implemented observability (Grafana, Prometheus, Dynatrace). Directly aligns with SRE, Platform Engineering, Cloud, and Leadership at scale.
+    2.  **Manager, Software Engineering – The Home Depot (Oct 2018 – May 2022):** Owned engineering for high-traffic eCommerce platforms, unified multiple platforms, reduced system maintenance costs by 50%, achieved zero production failures, and strengthened security posture. Directly aligns with Application Development, Platform Engineering, Security, and Leadership.
+    3.  **Independent Consultant – AI Engineering (Jul 2025 – Sep 2025):** Architected an enterprise-grade RAG platform using Chroma DB, LangChain, and multi-LLM orchestration, and designed scalable ingestion pipelines. Directly aligns with the JD's "Data & AI Integration" and "Application Development (Web and Data/AI)" aspects, demonstrating hands-on credibility in modern AI integration.
+*   **Top 3 Gaps/Irrelevancies:**
+    1.  **Explicit FinOps/Cost Governance Leadership:** While cost reduction is mentioned, the resume lacks explicit detail on leading "cost governance (FinOps), capacity planning, and performance optimization with transparent unit economics" as specifically called out in the JD.
+    2.  **Specific Compliance Frameworks:** The JD explicitly lists SOC 2, ISO 27001, and GDPR/CCPA. While the candidate has strong general security and platform experience, direct leadership or implementation experience with these specific compliance frameworks is not detailed.
+    3.  **Breadth of Enterprise Architecture & Integration Patterns Governance:** The JD emphasizes defining "reference architectures and integration patterns (APIs, event‑driven, streaming, data pipelines)" and governing contracts/versioning. While the candidate has experience with microservices and APIs, explicit leadership in defining and governing *enterprise-wide* reference architectures might be less detailed than the strong SRE/Platform/AppDev focus.)
+2026-02-25 16:29:50 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4339691355/
+2026-02-25 16:29:50 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4339691355/
+2026-02-25 16:29:52 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:29:52 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:29:52 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4377093124/, ai_response=- Overall Match Score: 1/10
+- Domain Taxonomy: AI & Cloud/Application Platform Engineering vs Embedded Systems/Silicon Design Software
+- Logistics Status: Suwanee, GA vs Hybrid (Austin, TX)
+- Recency Check: Fail (Domain-specific experience not within 5 years)
+- Strict Reason for Score: Severe domain mismatch (candidate's experience is in application-level cloud/AI platforms, JD is for software supporting silicon design/firmware) and a direct logistical mismatch (candidate is not local to the required hybrid Austin, TX location).
+
+- Top 3 Relevant Assets:
+    1.  Led Kubernetes migration to support global auction peaks (Dec 2022 – Jul 2025) - Demonstrates general platform resilience.
+    2.  Improved release cadence from bi-weekly to daily by maturing CI/CD pipelines (Dec 2022 – Jul 2025) - General software best practices.
+    3.  Implemented observability stack (Grafana, Prometheus, Dynatrace) (Dec 2022 – Jul 2025) - General software best practices.
+
+- Top 3 Gaps/Irrelevancies:
+    1.  **Domain Mismatch:** No experience in software for silicon design, firmware development on MCUs, or using tools like Cadence/Synopsys for hardware validation workflows, which are core to the JD.
+    2.  **Location Mismatch:** Candidate is in Suwanee, GA, while the role is a hybrid position requiring physical presence in Austin, TX.
+    3.  **AI Engineering Focus:** The candidate's recent deep expertise in RAG, LLMs, and agentic architectures is largely irrelevant to the specialized hardware-focused software engineering manager role.)
+2026-02-25 16:29:52 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4259100958/
+2026-02-25 16:29:52 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4259100958/
+2026-02-25 16:29:56 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:29:59 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:30:04 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:30:04 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4368041617/, ai_response=**Overall Match Score:** 3/10
+
+**Domain Taxonomy:** Candidate: Product/AppDev (eCommerce, Auction, AI Engineering) vs JD: Product/AppDev (Fleet Management, Logistics, Backend Services) - **Strong Domain Match**
+
+**Logistics Status:** Candidate: Suwanee, GA vs JD: Hybrid (3 days in office, likely Pittsburgh/Mountain View/Bozeman) - **Location Mismatch**
+
+**Recency Check:** Pass (Relevant leadership and accomplishments within 5 years)
+
+**Strict Reason for Score:** The candidate presents an excellent domain match with strong, recent leadership experience in large-scale Product/AppDev, cloud, and distributed systems. However, the **critical location mismatch** for a hybrid role, where the candidate is not local to any of the company's office hubs, triggers a hard fail, limiting the maximum possible score to 3.
+
+**Top 3 Relevant Assets (all < 5 years old):**
+1.  Led distributed engineering teams for large-scale auction, mobile, and payments platforms, including Kubernetes migration, CI/CD maturity, and observability implementation (Auction Technology Group, Dec 2022 – Jul 2025).
+2.  Owned engineering for high-traffic eCommerce websites and mobile applications, achieving zero production failures and implementing robust monitoring and security (The Home Depot, Oct 2018 – May 2022).
+3.  Deep expertise in cloud backend development, scalable web services, and distributed systems, demonstrated across multiple recent leadership roles.
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Location Mismatch:** Candidate is based in Suwanee, GA, which is not local to Aurora's hybrid office locations (e.g., Pittsburgh, Mountain View, Bozeman). This is a hard fail.
+2.  While the candidate has strong general Product/AppDev experience, there is no explicit experience in transportation, logistics, or autonomous vehicle fleet management, which are desirable qualifications for this specific role.
+3.  The recent Independent Consultant – AI Engineering role (July 2025 – Sep 2025) is a slight domain deviation from the core Product/AppDev focus of the JD, though it showcases advanced technical skills.)
+2026-02-25 16:30:04 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4376035297/
+2026-02-25 16:30:04 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4376035297/
+2026-02-25 16:30:07 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:30:07 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:30:08 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4368350629/, ai_response=*   **Overall Match Score:** 9/10
+*   **Domain Taxonomy:** Candidate Domain: ML/AI vs JD Domain: ML/AI
+*   **Logistics Status:** Candidate Location: Suwanee, GA (Remote-eligible) vs JD Location/Work Mode: Remote-eligible (No specific city required)
+*   **Recency Check:** Pass (Candidate has managed the specific AI Engineering domain within the last 5 years, e.g., Independent Consultant 2025, Senior Engineering Manager 2022-2025).
+*   **Strict Reason for Score:** Excellent domain alignment, with the candidate's recent experience (last 5 years) directly matching the JD's core focus on AI Engineering, agentic workflows, LLMs, and AI-first development practices. Logistics are a perfect match as both the candidate and the JD appear remote-eligible. The candidate demonstrates strong, recent leadership in relevant areas.
+*   **Top 3 Relevant Assets (Must be < 5 years old):**
+    1.  **Independent Consultant – AI Engineering (July 2025 – Sep 2025):** Architected an enterprise-grade RAG platform using Chroma DB, LangChain, and multi-LLM orchestration, directly aligning with the JD's emphasis on modern AI stacks and agent frameworks.
+    2.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Enhanced productivity using AI-driven development tooling (Cursor, GitHub Copilot, Claude Code), directly addressing the JD's requirement for defining and scaling AI-assisted development practices.
+    3.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Led Kubernetes migration, improved release cadence from bi-weekly to daily by maturing CI/CD pipelines, and implemented an observability stack, demonstrating a strong track record of improving delivery velocity and engineering maturity through platform investments.
+*   **Top 3 Gaps/Irrelevancies:**
+    1.  Lack of explicit experience with Databricks and MLflow, which are specifically mentioned in the JD's "What We're Looking For" section.
+    2.  While strong, the "Manager, Software Engineering – The Home Depot" role (Oct 2018 – May 2022) is less directly focused on AI/ML engineering compared to the JD's core requirements, though it provides valuable leadership and platform experience.
+    3.  Older leadership experience (e.g., McKesson pre-2017) is less weighted due to the "last 5 years" impact constraint, despite contributing to overall executive tenure.)
+2026-02-25 16:30:08 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4377521647/
+2026-02-25 16:30:08 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4377521647/
+2026-02-25 16:30:09 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:30:09 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4339691355/, ai_response=**Overall Match Score: 2/10**
+
+**Domain Taxonomy:** AI Engineering / General Cloud & Platform Engineering vs. Payments Platforms Chief Architect
+**Logistics Status:** Suwanee, GA (Remote-preferred candidate) vs. Undisclosed (Implied On-site/Hybrid or US Remote) - *Ambiguous, but not a hard fail on its own.*
+**Recency Check:** Fail (for specific domain expertise)
+
+**Strict Reason for Score:**
+This candidate presents a **Hard Fail** due to a significant domain mismatch. The Job Description is explicitly for a Chief Architect with a "strong focus on establishing Integrated Payments Platforms" and requires "10 Years of Payment Industry experience with extensive experience in leading Payment Architecture" and "Strong Payment Industry knowledge with a good background on Payment Products, Payment Business." The candidate's recent experience (last 1-2 years) is heavily in AI Engineering, and while they have strong general Cloud & Platform Engineering leadership, they lack explicit, recent, and extensive leadership experience in *Payments Architecture* as defined by the JD. The mention of "ATG Pay" integration is insufficient to meet the deep payments domain expertise required for a Chief Architect role in a payments business. The absence of a specific JD location makes a logistics mismatch difficult to confirm, but the domain mismatch alone triggers the hard fail.
+
+**Top 3 Relevant Assets (Must be < 5 years old):**
+1.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Led Kubernetes migration, matured CI/CD pipelines, and implemented observability stack, demonstrating strong platform engineering leadership.
+2.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Integrated ATG Pay into core systems, which is the closest experience to payments, though not explicitly "leading Payment Architecture" for a payments platform.
+3.  **Manager, Software Engineering – The Home Depot (Oct 2018 – May 2022):** Owned engineering for high-traffic eCommerce platforms, unified systems, and strengthened security posture, showcasing experience with large-scale, critical systems.
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Lack of Explicit Payments Architecture Leadership:** The most critical gap is the absence of recent (within 5-10 years) and extensive experience specifically leading architecture for integrated payments platforms or within the payments industry, which is the core requirement of the Chief Architect role.
+2.  **Recent AI Engineering Focus:** The candidate's most recent role (July 2025 – Sep 2025) is entirely focused on AI Engineering, which is a direct domain divergence from the JD's payments focus.
+3.  **Generalist Cloud/Platform vs. Specialist Payments:** While the candidate has strong general cloud and platform engineering skills, the JD demands a specialist with deep, demonstrated expertise in the payments domain, which is not clearly evidenced.)
+2026-02-25 16:30:09 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4368012476/
+2026-02-25 16:30:09 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4368012476/
+2026-02-25 16:30:11 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:30:11 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4259100958/, ai_response=-   **Overall Match Score:** 3/10
+-   **Domain Taxonomy:** Candidate: ML/AI & Cloud/Platform Engineering vs JD: ML/AI & Data Engineering (Platform Focus) - **Strong Domain Match**
+-   **Logistics Status:** Candidate: Suwanee, GA vs JD: On-site, San Francisco, CA - **Location Mismatch**
+-   **Recency Check:** Pass (Candidate has relevant domain and leadership experience within the last 5 and 10 years, respectively).
+-   **Strict Reason for Score:** Despite an excellent domain match with highly relevant and recent ML/AI and platform engineering experience, the candidate's location (Suwanee, GA) is a direct conflict with the job description's explicit requirement for candidates to be "Located in San Francisco, CA and open to working in office." This constitutes a hard logistical fail, limiting the maximum possible score to 3.
+-   **Top 3 Relevant Assets (Must be < 5 years old):**
+    1.  Architected an enterprise-grade RAG platform using Chroma DB, LangChain, and multi-LLM orchestration (July 2025 – Sep 2025).
+    2.  Led Kubernetes migration to support global auction peaks, improving platform resilience and elasticity (Dec 2022 – Jul 2025).
+    3.  Enhanced productivity using AI-driven development tooling (Cursor, GitHub Copilot, Claude Code) (Dec 2022 – Jul 2025).
+-   **Top 3 Gaps/Irrelevancies:**
+    1.  **Critical Gap:** Candidate's location (Suwanee, GA) does not meet the strict on-site requirement in San Francisco, CA.
+    2.  While the candidate has strong platform experience, specific technologies like Django, Celery, and Airflow, which are core to the JD's backend foundation, are not explicitly highlighted in the candidate's recent experience or core competencies.
+    3.  Management experience prior to 2018, while demonstrating leadership, is less directly relevant to the modern AI/Cloud platform challenges of the role compared to more recent accomplishments.)
+2026-02-25 16:30:11 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4368045538/
+2026-02-25 16:30:11 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4368045538/
+2026-02-25 16:30:12 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:30:16 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:30:19 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:30:19 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4376035297/, ai_response=**Overall Match Score:** 3/10
+**Domain Taxonomy:** Candidate: Infrastructure/Platform (with AI Engineering focus) vs JD: Infrastructure/Platform (with AI enablement focus)
+**Logistics Status:** Candidate Location: Suwanee, GA vs JD Location/Work Mode: Santa Clara, CA or Seattle, WA (On-site) - **Mismatch**
+**Recency Check:** Pass (Relevant leadership and domain experience within the last 5 years)
+
+**Strict Reason for Score:** Hard fail due to a significant location mismatch. The Job Description explicitly requires an "On-site role with presence aligned to local team cadence and needs" in Santa Clara, CA or Seattle, WA. The candidate is based in Suwanee, GA, which is a direct conflict with the logistical requirements, limiting the maximum possible score to 3.
+
+**Top 3 Relevant Assets (Must be < 5 years old):**
+1.  Led Kubernetes migration to support global auction peaks, improving platform resilience and elasticity (Auction Technology Group, Dec 2022 – Jul 2025).
+2.  Improved release cadence from bi-weekly to daily by maturing CI/CD pipelines and automated quality gates (Auction Technology Group, Dec 2022 – Jul 2025).
+3.  Implemented observability stack (Grafana, Prometheus, Dynatrace) enabling proactive detection and incident resolution (Auction Technology Group, Dec 2022 – Jul 2025).
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Location Mismatch:** The candidate's location (Suwanee, GA) does not align with the JD's on-site requirement in Santa Clara, CA or Seattle, WA.
+2.  **Domain Emphasis:** While the candidate has strong AI engineering experience, the JD's AI component is primarily focused on *enabling* AI on the platform, rather than deep AI model development or specific AI applications, making some of the candidate's specific AI framework experience (RAG, LangChain, MCP) less central to the core platform leadership role.
+3.  **Industry Specificity:** Lack of explicit experience in energy, IoT, or industrial domains, which are listed as preferred qualifications for this specific grid-interactive energy services platform role.)
+2026-02-25 16:30:19 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4368418168/
+2026-02-25 16:30:19 - __main__ - WARNING - Jobid: https://www.linkedin.com/comm/jobs/view/4368418168/ does exist in the job_results directory, from email subject: “Senior Software Engineering Manager”: Resmed - Senior Manager,Software Engineering and more
+2026-02-25 16:30:19 - queue_consumer.consumer - INFO - Accepted delivery:  
+2026-02-25 16:30:20 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:30:32 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:30:32 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4368045538/, ai_response=**Overall Match Score:** 3/10
+
+**Domain Taxonomy:** Candidate: Product/AppDev (eCommerce, Auction, AI Engineering) vs JD: Product/AppDev (Fleet Management, Logistics, Backend Services) - **Strong Domain Match**
+
+**Logistics Status:** Candidate: Suwanee, GA vs JD: Hybrid (3 days in office, likely Pittsburgh/Mountain View/Bozeman) - **Location Mismatch**
+
+**Recency Check:** Pass (Relevant leadership and accomplishments within 5 years)
+
+**Strict Reason for Score:** The candidate presents an excellent domain match with strong, recent leadership experience in large-scale Product/AppDev, cloud, and distributed systems. However, the **critical location mismatch** for a hybrid role, where the candidate is not local to any of the company's office hubs, triggers a hard fail, limiting the maximum possible score to 3.
+
+**Top 3 Relevant Assets (all < 5 years old):**
+1.  Led distributed engineering teams for large-scale auction, mobile, and payments platforms, including Kubernetes migration, CI/CD maturity, and observability implementation (Auction Technology Group, Dec 2022 – Jul 2025).
+2.  Owned engineering for high-traffic eCommerce websites and mobile applications, achieving zero production failures and implementing robust monitoring and security (The Home Depot, Oct 2018 – May 2022).
+3.  Deep expertise in cloud backend development, scalable web services, and distributed systems, demonstrated across multiple recent leadership roles.
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Location Mismatch:** Candidate is based in Suwanee, GA, which is not local to Aurora's hybrid office locations (e.g., Pittsburgh, Mountain View, Bozeman). This is a hard fail.
+2.  While the candidate has strong general Product/AppDev experience, there is no explicit experience in transportation, logistics, or autonomous vehicle fleet management, which are desirable qualifications for this specific role.
+3.  The recent Independent Consultant – AI Engineering role (July 2025 – Sep 2025) is a slight domain deviation from the core Product/AppDev focus of the JD, though it showcases advanced technical skills.)
+2026-02-25 16:30:32 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4368041617/
+2026-02-25 16:30:32 - __main__ - WARNING - Jobid: https://www.linkedin.com/comm/jobs/view/4368041617/ does exist in the job_results directory, from email subject: “Software Engineering Manager”: VAS - Software Engineering Manager and more
+2026-02-25 16:30:33 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:30:33 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4368012476/, ai_response=**Overall Match Score:** 3/10
+
+**Domain Taxonomy:** Candidate Domain: ML/AI Engineering (recent leadership) & Product/AppDev (historical) vs JD Domain: Product/AppDev (traditional enterprise Java)
+
+**Logistics Status:** Candidate Location: Suwanee, GA vs JD Location/Work Mode: Alpharetta, GA (Hybrid) - **Match**
+
+**Recency Check:** Fail (Candidate's primary leadership focus in the last 1.5 years is AI Engineering, not the specific traditional enterprise Java application development domain required by the JD. This would normally cap the score at 5, but the domain mismatch already caps it at 3.)
+
+**Strict Reason for Score:** The primary reason for the low score is a significant **Domain Mismatch**. The Job Description is explicitly for a Director, Lead Software Engineer focused on a traditional enterprise Java application stack (Core Java, Oracle, PL/SQL, Hibernate, WebLogic, SVN, Perl). While the candidate has a strong background in Product/AppDev, their most recent and highlighted leadership experience (Independent Consultant, Senior Engineering Manager at ATG) is heavily skewed towards AI Engineering, LLM integrations, and modern cloud/platform transformation (Kubernetes, CI/CD, Observability, AI-driven tooling). This represents a distinct domain shift from the JD's requirements. Despite a perfect Location Match, the strict domain exclusion policy results in a "Hard Fail," capping the score at 3.
+
+**Top 3 Relevant Assets (Must be < 5 years old):**
+1.  **Senior Engineering Manager – Auction Technology Group (Dec 2022 – Jul 2025):** Led distributed engineering teams, Kubernetes migration, improved CI/CD pipelines, and implemented observability stacks. This demonstrates strong leadership in modern software delivery and platform resilience.
+2.  **Manager, Software Engineering – The Home Depot (Oct 2018 – May 2022):** Owned engineering for high-traffic eCommerce HD-Pro websites, unified platforms, and achieved zero production failures, showcasing leadership in large-scale Product/AppDev.
+3.  **Core Java, Spring, Kafka, Python, React, Jenkins, Splunk, Kibana:** The candidate lists these technologies in their core competencies and has experience with them, aligning with some of the JD's required tech stack, albeit not as the primary focus of their recent leadership.
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Primary Domain Mismatch:** The candidate's recent leadership is predominantly in AI Engineering (RAG, LLMs, Agentic Architectures), which is not the core focus of this traditional enterprise Java Lead Software Engineer role.
+2.  **Specific Legacy Tech Stack Alignment:** The JD explicitly requires experience with specific, often older, enterprise technologies like Oracle Virtual Private Database, PL/SQL, Hibernate, WebLogic, SVN, and Perl. These are not prominently featured or led in the candidate's recent experience, which leans towards more modern data and cloud solutions.
+3.  **Leadership Focus Divergence:** While a strong leader, the candidate's recent impact is in AI and broad cloud transformation, rather than leading a team specifically dedicated to innovating and maintaining a traditional enterprise Java application platform as described by the JD.)
+2026-02-25 16:30:34 - queue_consumer.consumer - INFO - Accepted delivery: 
+2026-02-25 16:30:34 - queue_consumer.consumer - INFO - Accepted delivery: 
+2026-02-25 16:30:38 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:30:38 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4377521647/, ai_response=**Overall Match Score:** 6/10
+
+**Domain Taxonomy:** Candidate Domain: Product/AppDev (with AI/Cloud/Platform focus) vs JD Domain: Product/AppDev (with Supply Chain/Logistics Platform focus)
+
+**Logistics Status:** Candidate Location: Suwanee, GA vs JD Location/Work Mode: Flexible/Hybrid with up to 50% travel (no specific city specified). *Not a mismatch, but travel requirement is noted.*
+
+**Recency Check:** Pass (for both 5/10 year rules)
+
+**Strict Reason for Score:** While the candidate demonstrates exceptional leadership and technical expertise in Product/AppDev, platform engineering, and modern cloud/AI technologies, there is a critical gap in the specific industry domain. The Job Description explicitly requires a background in supply chain, logistics, or operational platforms, and experience with Order Management Systems (OMS). The candidate's experience in eCommerce and auction platforms, while involving operational aspects, does not directly align with these specialized industry requirements. This constitutes a "Partial" domain match under the strict policy, preventing a higher score despite strong general qualifications.
+
+**Top 3 Relevant Assets:**
+1.  **AI Engineering Leadership (July 2025 – Sep 2025):** Architected enterprise-grade RAG platform, built MCP-based interoperability, and designed scalable ingestion pipelines.
+2.  **Platform & Distributed Systems Leadership (Dec 2022 – Jul 2025):** Led distributed teams, drove Kubernetes migration, improved CI/CD pipelines, implemented observability, and enhanced productivity with AI tooling.
+3.  **eCommerce Platform Ownership (Oct 2018 – May 2022):** Owned engineering for high-traffic eCommerce platforms, unified multiple platforms, and significantly reduced system maintenance costs and production failures.
+
+**Top 3 Gaps/Irrelevancies:**
+1.  **Lack of Explicit Supply Chain/Logistics/Warehousing Domain Experience:** The JD specifically requires this specialized industry background, which is not clearly demonstrated in the candidate's recent experience.
+2.  **Absence of Explicit Order Management Systems (OMS) Experience:** A key requirement in the JD, which is not mentioned or highlighted in the resume.
+3.  **Limited Explicit EDI/External Partner API Integration Depth:** While general integration experience is present, the JD emphasizes specific ownership of EDI and external partner API integrations, which is not a clearly demonstrated recent strength.)
+2026-02-25 16:30:38 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4361245726/
+2026-02-25 16:30:38 - __main__ - WARNING - Jobid: https://www.linkedin.com/comm/jobs/view/4361245726/ does exist in the job_results directory, from email subject: “Director of Software Engineering”: Fanatics - Director Software Engineering and more
+2026-02-25 16:30:38 - __main__ - INFO - Processing job-url: https://www.linkedin.com/comm/jobs/view/4376492252/
+2026-02-25 16:30:38 - job_matcher_agent - INFO - Matching job-url: https://www.linkedin.com/comm/jobs/view/4376492252/
+2026-02-25 16:30:42 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-02-25 16:30:53 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-02-25 16:30:53 - __main__ - INFO - Job Matcher Result: JobMatcherResult(job_result=open, url=https://www.linkedin.com/comm/jobs/view/4376492252/, ai_response=*   **Overall Match Score:** 3/10
+*   **Domain Taxonomy:** Product/AppDev with ML/AI & Cloud vs Product/AppDev with ML/AI & Cloud
+*   **Logistics Status:** Suwanee, GA vs Hybrid (implied major city, e.g., Los Angeles, CA) - **Mismatch**
+*   **Recency Check:** Pass (Leadership and domain experience within the last 5 years)
+*   **Strict Reason for Score:** The candidate demonstrates an excellent domain match with recent, highly relevant leadership experience in Product/AppDev, AI, and Cloud transformation. However, the **hard fail on logistics (hybrid role, non-local candidate)** strictly limits the maximum possible score to 3, regardless of the strong technical alignment.
+*   **Top 3 Relevant Assets:** (Must be < 5 years old)
+    1.  Architected an enterprise-grade RAG platform using Chroma DB, LangChain, and multi-LLM orchestration (July 2025 – Sep 2025).
+    2.  Led distributed engineering teams building large-scale auction, mobile, and payments platforms, including Kubernetes migration, CI/CD maturity, and AI-driven tooling (Dec 2022 – Jul 2025).
+    3.  Owned engineering for high-traffic eCommerce HD-Pro websites and mobile applications, unifying platforms and strengthening security (Oct 2018 – May 2022).
+*   **Top 3 Gaps/Irrelevancies:**
+    1.  **Location Mismatch:** The JD specifies a "hybrid work opportunity," requiring presence in a KPMG office (e.g., Los Angeles, CA, as suggested by the JD's context). The candidate is located in Suwanee, GA, which is a direct logistical hard fail.
+    2.  While the candidate has general Azure experience, the JD emphasizes "recent experience... on Azure (App Services, Functions, Azure Kubernetes Service, SQL Database)" and "LLM fine-tuning (Azure OpenAI)". The candidate's most recent AI/Cloud work is not explicitly Azure-centric for AI, presenting a potential gap in specific platform depth for the JD's requirements.
+    3.  The JD prefers "ML frameworks (PyTorch, TensorFlow, scikit-learn)". While the candidate has strong AI engineering and a Machine Learning Certification, direct hands-on leadership with these specific frameworks isn't explicitly highlighted in recent roles, which could be a minor technical gap.)
+2026-02-25 16:30:55 - queue_consumer.consumer - INFO - Accepted delivery: 

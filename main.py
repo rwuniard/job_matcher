@@ -1,5 +1,6 @@
 from job_matcher_agent import match_job
 from queue_consumer import QueueConsumer
+from queue_consumer.message_processor import ProcessingResult
 from models import LinkedInJobAlert
 from dotenv import load_dotenv
 import os
@@ -21,8 +22,20 @@ NUM_CONSUMERS = int(os.getenv("NUM_CONSUMERS"))
 setup_logging()
 logger = logging.getLogger(__name__)
 
+def validate_jobid_exists_in_results(jobid: str) -> bool:
+        """
+        Validate if the jobid exists in the job_results directory
+        """
+        try:
+            if os.path.exists(f"./job_results/{jobid}.ai_response"):
+                return True
+            else:
+                return False
+        except Exception as e:
+            logger.error(f"Error validating jobid: {jobid}, error: {e}")
+            return False
 
-def message_processor(message_id: str, message_body: str) -> bool:
+def message_processor(message_id: str, message_body: str) -> ProcessingResult:
     """
     Message processor function for processing messages from the AMQP broker.
     This function is called by the QueueConsumer when a new message is received.
@@ -31,14 +44,16 @@ def message_processor(message_id: str, message_body: str) -> bool:
         message_id: The ID of the message
         message_body: The body of the message
     Returns:
-        True if the message was processed successfully, False otherwise
+        ProcessingResult.ACCEPTED  — all jobs processed, remove from queue.
+        ProcessingResult.RELEASED  — transient failure, requeue for retry.
+        ProcessingResult.REJECTED  — malformed message, send to Dead Letter Queue.
     """
     # Parse the envelope once — if this fails the message is genuinely malformed.
     try:
         alert = LinkedInJobAlert.model_validate_json(message_body)
     except Exception as e:
         logger.error(f"Error parsing message-id: {message_id}, error: {e}")
-        return False
+        return ProcessingResult.REJECTED
 
     os.makedirs("./job_results", exist_ok=True)
 
@@ -46,10 +61,15 @@ def message_processor(message_id: str, message_body: str) -> bool:
         # Each job is independent — one failure must not affect the others.
         try:
             logger.info(f"Processing job-url: {job.url}")
-            job_matcher_result = match_job(job.url)
-            logger.info(f"Job Matcher Result: {job_matcher_result}")
 
             job_id = job.url.rstrip("/").split("/")[-1]
+            # Validate if the jobid exists in the job_results directory
+            if validate_jobid_exists_in_results(job_id):
+                logger.warning(f"Jobid: {job.url} does exist in the job_results directory, from email subject: {alert.subject}")
+                continue
+
+            job_matcher_result = match_job(job.url)
+            logger.info(f"Job Matcher Result: {job_matcher_result}")
 
             if job_matcher_result.job_status == "applied":
                 with open(f"./job_results/{job_id}.applied", "w") as f:
@@ -57,7 +77,7 @@ def message_processor(message_id: str, message_body: str) -> bool:
                     f.write(f"From email subject: {alert.subject}\n")
                     f.write(f"From email date: {alert.date}\n")
                     f.write(f"Job Title: {job.title}\n")
-                    f.write(f"You have already applied to this job.")
+                    f.write("You have already applied to this job.")
 
             elif job_matcher_result.job_status == "closed":
                 with open(f"./job_results/{job_id}.closed", "w") as f:
@@ -65,7 +85,7 @@ def message_processor(message_id: str, message_body: str) -> bool:
                     f.write(f"From email subject: {alert.subject}\n")
                     f.write(f"From email date: {alert.date}\n")
                     f.write(f"Job Title: {job.title}\n")
-                    f.write(f"The job is closed.")
+                    f.write("The job is closed.")
 
             elif job_matcher_result.job_status == "open":
                 with open(f"./job_results/{job_id}.ai_response", "w") as f:
@@ -81,12 +101,14 @@ def message_processor(message_id: str, message_body: str) -> bool:
                 logger.error(f"Invalid job status: {job_matcher_result.job_status} for {job.url}")
 
         except Exception as e:
-            # Bug 2 fix: log and continue to the next job.
-            # Returning False here would reject the whole message, causing all already-processed
-            # jobs in this email to be rerun with no idempotency protection.
+            # Log and continue to the next job — individual job failures do not
+            # affect remaining jobs, and the message is still accepted to avoid
+            # reprocessing already-completed jobs (idempotency protection).
             logger.error(f"Error processing job-url: {job.url}, error: {e}")
 
-    return True
+    return ProcessingResult.ACCEPTED
+
+   
 
 def main():
     logger.info("Hello from job-matcher!")

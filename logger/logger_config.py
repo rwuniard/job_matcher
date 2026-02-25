@@ -23,6 +23,7 @@ class Log:
     ENV_LOG_LEVEL = 'LOG_LEVEL'
     ENV_LOG_FORMAT = 'LOG_FORMAT'  # 'json', 'text', or 'dual'
     ENV_ENVIRONMENT = 'ENVIRONMENT'  # 'development' or 'production'
+    ENV_LOG_FILE = 'LOG_FILE'  # optional file path for log output
     _configured = False
 
     def __init__(
@@ -46,6 +47,7 @@ class Log:
         self.log_level = self._get_log_level(log_level)
         self.log_format = self._get_log_format(log_format)
         self.environment = environment or os.getenv(self.ENV_ENVIRONMENT, 'development')
+        self.log_file = os.getenv(self.ENV_LOG_FILE)
         
     
     def _get_log_level(self, level: Optional[str]) -> int:
@@ -89,6 +91,9 @@ class Log:
         else:  # dual
             self._add_json_handler(root_logger)
             self._add_text_handler(root_logger)
+
+        if self.log_file:
+            self._add_file_handler(root_logger)
         
         self._configured = True
         
@@ -146,6 +151,26 @@ class Log:
         handler.setLevel(self.log_level)
         logger.addHandler(handler)
     
+    def _add_file_handler(self, logger: logging.Logger):
+        """Add a rotating file handler that writes text logs to LOG_FILE."""
+        from logging.handlers import RotatingFileHandler
+        log_dir = os.path.dirname(self.log_file)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
+        handler = RotatingFileHandler(
+            self.log_file,
+            maxBytes=10 * 1024 * 1024,  # 10 MB
+            backupCount=5,
+            encoding='utf-8',
+        )
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        handler.setFormatter(formatter)
+        handler.setLevel(self.log_level)
+        logger.addHandler(handler)
+
     @staticmethod
     def get_logger(name: Optional[str] = None) -> logging.Logger:
         """
