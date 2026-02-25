@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 _processing_job_ids: set[str] = set()
 _processing_lock = threading.Lock()
 
+_REPORT_HEADER = "# Job Match Report\n\n"
+
 
 def validate_jobid_exists_in_results(jobid: str) -> bool:
         """
@@ -38,7 +40,7 @@ def validate_jobid_exists_in_results(jobid: str) -> bool:
                     return True
             return any(
                 os.path.exists(f"./job_results/{jobid}.{ext}")
-                for ext in ("ai_response", "applied", "closed")
+                for ext in ("ai_response.md", "applied.md", "closed.md")
             )
         except Exception as e:
             logger.error(f"Error validating jobid: {jobid}, error: {e}")
@@ -90,29 +92,36 @@ def message_processor(message_id: str, message_body: str) -> ProcessingResult:
             logger.info(f"Job Matcher Result: {job_matcher_result}")
 
             if job_matcher_result.job_status == "applied":
-                with open(f"./job_results/{job_id}.applied", "w") as f:
-                    f.write(f"Job URL: {job.url}\n")
-                    f.write(f"From email subject: {alert.subject}\n")
-                    f.write(f"From email date: {alert.date}\n")
-                    f.write(f"Job Title: {job.title}\n")
-                    f.write("You have already applied to this job.")
+                with open(f"./job_results/{job_id}.applied.md", "w") as f:
+                    f.write(_REPORT_HEADER)
+                    f.write(f"**Job Title:** {job.title}  \n")
+                    f.write(f"**Job URL:** {job.url}  \n")
+                    f.write(f"**Email Subject:** {alert.subject}  \n")
+                    f.write(f"**Email Date:** {alert.date}\n\n")
+                    f.write("## Status: Applied\n\n")
+                    f.write("You have already applied to this job.\n")
 
             elif job_matcher_result.job_status == "closed":
-                with open(f"./job_results/{job_id}.closed", "w") as f:
-                    f.write(f"Job URL: {job.url}\n")
-                    f.write(f"From email subject: {alert.subject}\n")
-                    f.write(f"From email date: {alert.date}\n")
-                    f.write(f"Job Title: {job.title}\n")
-                    f.write("The job is closed.")
+                with open(f"./job_results/{job_id}.closed.md", "w") as f:
+                    f.write(_REPORT_HEADER)
+                    f.write(f"**Job Title:** {job.title}  \n")
+                    f.write(f"**Job URL:** {job.url}  \n")
+                    f.write(f"**Email Subject:** {alert.subject}  \n")
+                    f.write(f"**Email Date:** {alert.date}\n\n")
+                    f.write("## Status: Closed\n\n")
+                    f.write("This job is no longer accepting applications.\n")
 
             elif job_matcher_result.job_status == "open":
-                with open(f"./job_results/{job_id}.ai_response", "w") as f:
-                    f.write(f"Job URL: {job.url}\n")
-                    f.write(f"From email subject: {alert.subject}\n")
-                    f.write(f"From email date: {alert.date}\n")
-                    f.write(f"Job Title: {job.title}\n")
-                    f.write(f"AI Response: {job_matcher_result.ai_response}\n")
-                    f.write(f"\n\nJob description: {job_matcher_result.job_description}\n")
+                with open(f"./job_results/{job_id}.ai_response.md", "w") as f:
+                    f.write(_REPORT_HEADER)
+                    f.write(f"**Job Title:** {job.title}  \n")
+                    f.write(f"**Job URL:** {job.url}  \n")
+                    f.write(f"**Email Subject:** {alert.subject}  \n")
+                    f.write(f"**Email Date:** {alert.date}\n\n")
+                    f.write("## AI Analysis\n\n")
+                    f.write(f"{job_matcher_result.ai_response}\n\n")
+                    f.write("## Job Description\n\n")
+                    f.write(f"{job_matcher_result.job_description}\n")
 
             else:
                 # Bug 3 fix: log and continue; don't abandon remaining jobs in the loop.

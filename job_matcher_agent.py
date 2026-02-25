@@ -49,29 +49,36 @@ def match_job(job_url: str) -> JobMatcherResult:
             If any "Hard Fail" occurs, the maximum possible score is 3.
                 - Primary Domain: Select one: [Product/AppDev, Infrastructure/Platform, Data Engineering, ML/AI, Security].
                     Constraint: "Data Platforms" (ETL/Spark/Airflow) are NOT a match for "Infrastructure/Platform" (K8s/Terraform/Cloud Primitives).
+                    Example: "Product/AppDev" (Web/Mobile/Desktop Apps) are a match for "Product/AppDev" (Web/Mobile/Desktop Apps).
+                    Example: "Product/AppDev" (Web/Mobile/Desktop Apps) are POTENTIALLy a match for "ML/AI" (RAG/LangChain/LangGraph).
+                    Example: "Product/AppDev" (Web/Mobile/Desktop Apps) are not a match for "Infrastructure/Platform/DevOps/Networking" (K8s/Terraform/Cloud Primitives).
+                    Example: "Product/AppDev" (Web/Mobile/Desktop Apps) are not a match for "Data Engineering" (ETL/Spark/Airflow).
+                    Example: "Product/AppDev" (Web/Mobile/Desktop Apps) are not a match for "Security" (Encryption/Access Control/Compliance).
+
                 - Location/Work Mode: Identify the JD's requirement (Remote, Hybrid, or On-site) and the Candidate's location.
-                    Logic: If JD is On-site/Hybrid and the candidate is not in the same city/region, this is a Location Mismatch.
+                    Logic: If JD is On-site/Hybrid and the candidate is not in the same State/Province/Region, this is a Location Mismatch.
                 -   Logic: If JD is Remote, the candidate's location is a Match.
 
             Step 2: Scoring Rubric (Strict Enforcement)
-                - 1-3 (Hard Fail): Domain mismatch OR Location mismatch. (e.g., A Data Leader applying for Infra, or a non-local candidate applying for an on-site role with no remote option).
+                - 1-3 (Hard Fail): Domain mismatch OR Location mismatch. (e.g., A Product/AppDev Leader applying for Infrastructure, or a non-local candidate applying for an on-site role with no remote option, UNLESS relocation is possible).
                 - 4-6 (Adjacent/Stale/Partial): Domain matches, but location is "Preferred" not "Required," or technical skills/leadership are older than 5 years.
-                - 7-10 (Ideal Match): Perfect Domain Match + Location/Remote Match + Leadership impact within the last 5 years.
+                - 7-10 (Ideal Match): Perfect Domain Match + Location/Remote Match + Leadership impact within the last 5 years. If the candidate is highly relevant and the job location is not a hard fail, please score higher than 7, and specify in the report clearly about the location mismatch and the reason for the score.
 
             Step 3: Evaluation Constraints
                 - Recency Penalty: If the candidate has not managed the specific domain in the last 5 years, the maximum score is 5.
                 - Leadership Recency: No credit for management experience older than 10 years.
                 - Accomplishments: Weight only the last 5 years of impact.
                 - Location Logic: Increase the score (+1 or +2) only if the candidate is local to the JD city or the JD specifically lists "Remote" as an option.
+                - Please review the job description on the qualification requirements and the candidate's experience to see if the candidate is a match for the job (this should be listed in the report)
 
-        Output Format (Brief & Structured):
+        Output Format with markdown formatting(Brief & Structured):
             - Overall Match Score: [X/10]
             - Domain Taxonomy: [Candidate Domain] vs [JD Domain]
             - Logistics Status: [Candidate Location] vs [JD Location/Work Mode]
             - Recency Check: [Pass/Fail for 5/10 year rules]
             - Strict Reason for Score: (Explicitly mention Domain and Location alignment)
-            - Top 3 Relevant Assets: (Must be < 5 years old)
-            - Top 3 Gaps/Irrelevancies: (Include domain mismatches or outdated experience)
+            - Show the Relevant Assets: (Must be < 5 years old)
+            - Show the Gaps/Irrelevancies: (Include domain mismatches or outdated experience)
         """)
 
     resume = get_resume("resume.txt")
