@@ -53,6 +53,7 @@ NUM_CONSUMERS=1
 LOG_LEVEL=INFO
 LOG_FORMAT=text      # json | text | dual
 ENVIRONMENT=development
+# LOG_FILE=logs/job_matcher.log   # optional: write logs to a rotating file
 ```
 
 ## LinkedIn Authentication (First Run Only)
@@ -98,9 +99,11 @@ Results are saved to `./job_results/` with the job ID as the filename:
 
 | File | Meaning |
 |---|---|
-| `{job_id}.ai_response` | AI scoring and gap analysis for open jobs |
-| `{job_id}.applied` | Job was already applied to — skipped |
-| `{job_id}.closed` | Job is no longer accepting applications — skipped |
+| `{job_id}.ai_response.md` | AI scoring and gap analysis for open jobs |
+| `{job_id}.applied.md` | Job was already applied to — skipped |
+| `{job_id}.closed.md` | Job is no longer accepting applications — skipped |
+
+All result files are written in Markdown format.
 
 ## Running Tests
 
