@@ -60,7 +60,7 @@ def match_job(job_url: str) -> JobMatcherResult:
                 -   Logic: If JD is Remote, the candidate's location is a Match.
 
             Step 2: Scoring Rubric (Strict Enforcement)
-                - 1-3 (Hard Fail): Domain mismatch OR Location mismatch. (e.g., A Product/AppDev Leader applying for Infrastructure, or a non-local candidate applying for an on-site role with no remote option, UNLESS relocation is possible).
+                - 1-3 (Hard Fail): Domain mismatch OR Location mismatch in different State/Province/Region. (e.g., A Product/AppDev Leader applying for Infrastructure, or a non-local candidate applying for an on-site role with no remote option, UNLESS relocation is possible).
                 - 4-6 (Adjacent/Stale/Partial): Domain matches, but location is "Preferred" not "Required," or technical skills/leadership are older than 5 years.
                 - 7-10 (Ideal Match): Perfect Domain Match + Location/Remote Match + Leadership impact within the last 5 years. If the candidate is highly relevant and the job location is not a hard fail, please score higher than 7, and specify in the report clearly about the location mismatch and the reason for the score.
 
