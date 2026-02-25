@@ -4,6 +4,7 @@ from queue_consumer.message_processor import ProcessingResult
 from models import LinkedInJobAlert
 from dotenv import load_dotenv
 import os
+import threading
 from logger import setup_logging
 import logging
 
@@ -22,15 +23,23 @@ NUM_CONSUMERS = int(os.getenv("NUM_CONSUMERS"))
 setup_logging()
 logger = logging.getLogger(__name__)
 
+_processing_job_ids: set[str] = set()
+_processing_lock = threading.Lock()
+
+
 def validate_jobid_exists_in_results(jobid: str) -> bool:
         """
-        Validate if the jobid exists in the job_results directory
+        Validate if the jobid has already been processed or is currently in-flight.
+        Checks result files (.ai_response, .applied, .closed) and the in-flight set.
         """
         try:
-            if os.path.exists(f"./job_results/{jobid}.ai_response"):
-                return True
-            else:
-                return False
+            with _processing_lock:
+                if jobid in _processing_job_ids:
+                    return True
+            return any(
+                os.path.exists(f"./job_results/{jobid}.{ext}")
+                for ext in ("ai_response", "applied", "closed")
+            )
         except Exception as e:
             logger.error(f"Error validating jobid: {jobid}, error: {e}")
             return False
@@ -68,7 +77,16 @@ def message_processor(message_id: str, message_body: str) -> ProcessingResult:
                 logger.warning(f"Jobid: {job.url} does exist in the job_results directory, from email subject: {alert.subject}")
                 continue
 
-            job_matcher_result = match_job(job.url)
+            # Mark in-flight before the slow LLM/Playwright call so concurrent
+            # workers processing the same job_id see it and skip.
+            with _processing_lock:
+                _processing_job_ids.add(job_id)
+
+            try:
+                job_matcher_result = match_job(job.url)
+            finally:
+                with _processing_lock:
+                    _processing_job_ids.discard(job_id)
             logger.info(f"Job Matcher Result: {job_matcher_result}")
 
             if job_matcher_result.job_status == "applied":
