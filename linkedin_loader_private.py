@@ -94,7 +94,7 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
 
             if "no longer accepting applications" in page_text:
                 status = "closed"
-            elif "application submitted" in page_text:
+            elif "application submitted" in page_text or "practice an interview" in page_text:
                 status = "applied"
             else:
                 status = "open"
