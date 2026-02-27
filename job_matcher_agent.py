@@ -56,12 +56,13 @@ def match_job(job_url: str) -> JobMatcherResult:
                     Example: "Product/AppDev" (Web/Mobile/Desktop Apps) are not a match for "Security" (Encryption/Access Control/Compliance).
 
                 - Location/Work Mode: Identify the JD's requirement (Remote, Hybrid, or On-site) and the Candidate's location.
-                    Logic: If JD is On-site/Hybrid and the candidate is not in the same State/Province/Region, this is a Location Mismatch.
-                -   Logic: If JD is Remote, the candidate's location is a Match.
+                    Logic: If JD is On-site/Hybrid and the candidate is not in the same State, this is a Location Mismatch.
+                    Logic: If JD is Remote, the candidate's location is a Match. 
 
             Step 2: Scoring Rubric (Strict Enforcement)
-                - 1-3 (Hard Fail): Domain mismatch OR Location mismatch in different State/Province/Region. (e.g., A Product/AppDev Leader applying for Infrastructure, or a non-local candidate applying for an on-site role with no remote option, UNLESS relocation is possible).
+                - 1-3 (Hard Fail): Domain mismatch. (e.g., A Product/AppDev Leader applying for Infrastructure).
                 - 4-6 (Adjacent/Stale/Partial): Domain matches, but location is "Preferred" not "Required," or technical skills/leadership are older than 5 years.
+                - 6-8 (Location Mismatch): Location mismatch in different State/Province/Region OR Location is not specified in the JD. Important:The Domain is a match, but the location is not a match. If the Domain is not a match, then the score is 1-3.
                 - 7-10 (Ideal Match): Perfect Domain Match + Location/Remote Match + Leadership impact within the last 5 years. If the candidate is highly relevant and the job location is not a hard fail, please score higher than 7, and specify in the report clearly about the location mismatch and the reason for the score.
 
             Step 3: Evaluation Constraints
