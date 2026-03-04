@@ -4,6 +4,7 @@ from queue_consumer.message_processor import ProcessingResult
 from models import LinkedInJobAlert
 from dotenv import load_dotenv
 import os
+import re
 import threading
 from logger import setup_logging
 import logging
@@ -40,6 +41,13 @@ _processing_job_ids: set[str] = set()
 _processing_lock = threading.Lock()
 
 _REPORT_HEADER = "# Job Match Report\n\n"
+_SCORE_RE = re.compile(r'Overall Match Score\D*(\d{1,2})/10', re.IGNORECASE)
+
+
+def _extract_score(ai_response: str) -> str:
+    """Return the numeric score string from the AI response, or 'na' if not found."""
+    m = _SCORE_RE.search(ai_response)
+    return m.group(1) if m else "na"
 
 
 def _try_claim_job(job_id: str) -> bool:
@@ -132,7 +140,8 @@ def message_processor(message_id: str, message_body: str) -> ProcessingResult:
                     f.write("This job is no longer accepting applications.\n")
 
             elif job_matcher_result.job_status == "open":
-                with open(f"./job_results/{job_id}.ai_response.md", "w") as f:
+                score = _extract_score(job_matcher_result.ai_response)
+                with open(f"./job_results/{job_id}.{score}.ai_response.md", "w") as f:
                     f.write(_REPORT_HEADER)
                     f.write(f"**Job Title:** {job.title}  \n")
                     f.write(f"**Job URL:** {job.url}  \n")

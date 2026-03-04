@@ -22,6 +22,10 @@ logger = logging.getLogger(__name__)
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
+_PROMPT_FILE = os.path.join(os.path.dirname(__file__), "prompts", "system_prompt.txt")
+with open(_PROMPT_FILE, encoding="utf-8") as _f:
+    _SYSTEM_PROMPT = _f.read()
+
 
 
 
@@ -40,47 +44,8 @@ def match_job(job_url: str) -> JobMatcherResult:
     agent = create_agent(
         model=model,
         tools=[],
-        system_prompt="""
-        Role: You are a highly critical Technical Executive Recruiter. You enforce a "Strict Domain & Logistics Exclusion" policy 
-        to ensure roles are only filled by specialized, locally-available, or remote-eligible candidates.
-
-        Task: Perform a multi-step audit of a Job Description and a Resume.
-            Step 1: Domain & Logistics Taxonomy (The "Hard Fail" Check) Identify the following categories before scoring. 
-            If any "Hard Fail" occurs, the maximum possible score is 3.
-                - Primary Domain: Select one: [Product/AppDev, Infrastructure/Platform, Data Engineering, ML/AI, Security].
-                    Constraint: "Data Platforms" (ETL/Spark/Airflow) are NOT a match for "Infrastructure/Platform" (K8s/Terraform/Cloud Primitives).
-                    Example: "Product/AppDev" (Web/Mobile/Desktop Apps) are a match for "Product/AppDev" (Web/Mobile/Desktop Apps).
-                    Example: "Product/AppDev" (Web/Mobile/Desktop Apps) are POTENTIALLy a match for "ML/AI" (RAG/LangChain/LangGraph).
-                    Example: "Product/AppDev" (Web/Mobile/Desktop Apps) are not a match for "Infrastructure/Platform/DevOps/Networking" (K8s/Terraform/Cloud Primitives).
-                    Example: "Product/AppDev" (Web/Mobile/Desktop Apps) are not a match for "Data Engineering" (ETL/Spark/Airflow).
-                    Example: "Product/AppDev" (Web/Mobile/Desktop Apps) are not a match for "Security" (Encryption/Access Control/Compliance).
-
-                - Location/Work Mode: Identify the JD's requirement (Remote, Hybrid, or On-site) and the Candidate's location.
-                    Logic: If JD is On-site/Hybrid and the candidate is not in the same State, this is a Location Mismatch.
-                    Logic: If JD is Remote, the candidate's location is a Match. 
-
-            Step 2: Scoring Rubric (Strict Enforcement)
-                - 1-3 (Hard Fail): Domain mismatch. (e.g., A Product/AppDev Leader applying for Infrastructure).
-                - 4-6 (Adjacent/Stale/Partial): Domain matches, but location is "Preferred" not "Required," or technical skills/leadership are older than 5 years.
-                - 6-8 (Location Mismatch): Location mismatch in different State/Province/Region OR Location is not specified in the JD. Important:The Domain is a match, but the location is not a match. If the Domain is not a match, then the score is 1-3.
-                - 7-10 (Ideal Match): Perfect Domain Match + Location/Remote Match + Leadership impact within the last 5 years. If the candidate is highly relevant and the job location is not a hard fail, please score higher than 7, and specify in the report clearly about the location mismatch and the reason for the score.
-
-            Step 3: Evaluation Constraints
-                - Recency Penalty: If the candidate has not managed the specific domain in the last 5 years, the maximum score is 5.
-                - Leadership Recency: No credit for management experience older than 10 years.
-                - Accomplishments: Weight only the last 5 years of impact.
-                - Location Logic: Increase the score (+1 or +2) only if the candidate is local to the JD city or the JD specifically lists "Remote" as an option.
-                - Please review the job description on the qualification requirements and the candidate's experience to see if the candidate is a match for the job (this should be listed in the report)
-
-        Output Format with markdown formatting(Brief & Structured):
-            - Overall Match Score: [X/10]
-            - Domain Taxonomy: [Candidate Domain] vs [JD Domain]
-            - Logistics Status: [Candidate Location] vs [JD Location/Work Mode]
-            - Recency Check: [Pass/Fail for 5/10 year rules]
-            - Strict Reason for Score: (Explicitly mention Domain and Location alignment)
-            - Show the Relevant Assets: (Must be < 5 years old)
-            - Show the Gaps/Irrelevancies: (Include domain mismatches or outdated experience)
-        """)
+        system_prompt=_SYSTEM_PROMPT,
+    )
 
     resume = get_resume("resume.txt")
 
@@ -109,6 +74,7 @@ def match_job(job_url: str) -> JobMatcherResult:
     Resume: {resume}
 
     Job Title: {job.title}
+    Job Location: {job.location}
     Job Description: {job.description}
     """
 

@@ -29,9 +29,9 @@ An automated AI-powered pipeline that evaluates LinkedIn job postings against a 
 
 1. **Consume** — Worker threads listen to an ActiveMQ Artemis queue. Each message represents one LinkedIn Job Alert email and contains a list of job URLs.
 
-2. **Scrape** — For each job URL, Playwright loads the authenticated LinkedIn page and extracts the full job description and application status (open / applied / closed).
+2. **Scrape** — For each job URL, Playwright loads the authenticated LinkedIn page and extracts the job title, full description, application status (open / applied / closed), and **location + work type** (e.g. `Atlanta, GA (On-site)`). Location is scraped from the top-card header using a selector cascade with a regex fallback, so it works for any city or country format.
 
-3. **Evaluate** — A LangChain agent powered by Google Gemini acts as a strict Technical Recruiter, scoring the candidate's resume against the job description across domain fit, location, and recency of experience.
+3. **Evaluate** — A LangChain agent powered by Google Gemini acts as a strict Technical Recruiter, scoring the candidate's resume against the job description across domain fit, location, and recency of experience. The job's **location and work type** are provided explicitly to the agent so it can make an accurate location determination without having to infer it from the description text.
 
 4. **Report** — A Markdown report is written to `./job_results/` for every processed job, capturing the AI score, gap analysis, and full job description for reference.
 
@@ -185,6 +185,8 @@ job_matcher/
 ├── linkedin_loader_private.py   # Playwright-based LinkedIn scraper (authenticated)
 ├── linkedin_loader.py           # Public LinkedIn scraper (no auth, legacy)
 ├── get_resume.py                # Resume file reader
+├── prompts/
+│   └── system_prompt.txt        # AI recruiter system prompt (edit without touching Python)
 ├── models/
 │   └── linkedin.py              # Pydantic models (LinkedInJobAlert, Job)
 ├── queue_consumer/
@@ -206,15 +208,17 @@ job_matcher/
 
 ## Agent Scoring Rubric
 
-The agent acts as a strict Technical Executive Recruiter enforcing domain and location matching.
+The agent acts as a strict Technical Executive Recruiter enforcing domain and location matching. The full prompt lives in [`prompts/system_prompt.txt`](prompts/system_prompt.txt) — edit it there without touching Python code.
 
 ### Scores
 
 | Score | Meaning |
 |---|---|
-| 1–3 | Hard fail: domain mismatch or location mismatch |
-| 4–6 | Adjacent domain, stale experience (>5 years), or partial location match |
+| 1–3 | Hard fail: domain mismatch (cap applied regardless of location) |
+| 4–6 | Domain matches but location is a mismatch, or experience is stale (>5 years) |
 | 7–10 | Strong domain alignment + location/remote match + recent leadership |
+
+Location mismatch (On-site/Hybrid role in a different state) subtracts 3 points from the otherwise-calculated score.
 
 ### Domain Categories
 
@@ -224,13 +228,19 @@ The agent acts as a strict Technical Executive Recruiter enforcing domain and lo
 - ML/AI
 - Security
 
-### Hard Fail Rules
+### Location / Work Mode Logic
 
-- Domain mismatch (e.g. Data leader applying for Infrastructure role)
-- Location mismatch for on-site/hybrid roles
-- No management experience in the domain within the last 10 years
+The scraper extracts the work type directly from the LinkedIn top-card header and passes it to the agent as `Job Location` (e.g. `Atlanta, GA (On-site)`). The agent applies these rules:
 
-### Penalties
+| JD Work Mode | Candidate State | Result |
+|---|---|---|
+| Remote | Any | Match |
+| On-site / Hybrid | Same state as JD | Match |
+| On-site / Hybrid | Different state | Mismatch (−3 pts) |
+| Not specified | Any | Treated as unspecified |
 
-- Experience older than 5 years in the domain → max score 5
-- Leadership older than 10 years → not counted
+### Recency Constraints
+
+- No domain management in the last 5 years → max score 5
+- Leadership experience older than 10 years → not counted
+- Only accomplishments from the last 5 years weighted

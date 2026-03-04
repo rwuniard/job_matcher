@@ -1,6 +1,7 @@
 import logging
+import re
 import threading
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from playwright.sync_api import sync_playwright, BrowserContext, Page
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,7 @@ class LinkedInJob:
     title: str
     description: str
     status: str  # "open", "applied", "closed"
+    location: str = field(default="")  # e.g. "Atlanta, GA (On-site)"
 
 
 class LinkedInSessionExpiredError(RuntimeError):
@@ -88,9 +90,41 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
             raw_title = page.title()
             title = raw_title.split(" | ")[0].strip() if " | " in raw_title else raw_title.strip()
 
+            # Extract location + work type from the top-card header.
+            # LinkedIn renders this as: "Company · City, State (On-site)" in a subtitle line.
+            # We try specific selectors first, then fall back to regex on raw page text.
+            location = ""
+            _location_selectors = [
+                ".job-details-jobs-unified-top-card__primary-description-without-tagline",
+                ".job-details-jobs-unified-top-card__primary-description",
+                ".jobs-unified-top-card__primary-description",
+                ".jobs-unified-top-card__workplace-type",
+            ]
+            for _sel in _location_selectors:
+                _elem = page.locator(_sel).first
+                if _elem.count() > 0:
+                    _text = _elem.inner_text().strip()
+                    if _text:
+                        location = _text
+                        break
+
             # Detect application status — full page text is the most reliable fallback
             # because LinkedIn frequently renames CSS classes and SDUI components.
-            page_text = page.locator("body").inner_text().lower()
+            page_text_raw = page.locator("body").inner_text()
+            page_text = page_text_raw.lower()
+
+            # Regex fallback: find the workplace type, then extract whatever location
+            # text appears on the same line immediately before it.
+            # This handles any city/region/country format (US, international, metro areas).
+            if not location:
+                _wt_match = re.search(r'\b(On-site|Hybrid|Remote)\b', page_text_raw, re.IGNORECASE)
+                if _wt_match:
+                    workplace_type = _wt_match.group(1)
+                    line_start = page_text_raw.rfind('\n', 0, _wt_match.start()) + 1
+                    preceding = page_text_raw[line_start:_wt_match.start()].strip()
+                    # Strip trailing separators (·, •, -, parens) from the location text
+                    preceding = re.sub(r'[\s\u00b7\u2022\-\(]+$', '', preceding).strip()
+                    location = f"{preceding} ({workplace_type})" if preceding else workplace_type
 
             if "no longer accepting applications" in page_text:
                 status = "closed"
@@ -137,7 +171,7 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
                 logger.warning("Could not extract job description for %s — page structure may have changed.", url)
 
             browser.close()
-            return LinkedInJob(title=title, description=description, status=status)
+            return LinkedInJob(title=title, description=description, status=status, location=location)
 
 
 def main():
@@ -150,6 +184,7 @@ def main():
     job = get_linkedin_job(job_url, first_login=False)
 
     print(f"Title: {job.title}")
+    print(f"Location: {job.location}")
     print(f"Status: {job.status}")
     print(f"\nDescription:\n{job.description}")
 
