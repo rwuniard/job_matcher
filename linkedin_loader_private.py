@@ -116,12 +116,30 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
             # Regex fallback: find the workplace type, then extract whatever location
             # text appears on the same line immediately before it.
             # This handles any city/region/country format (US, international, metro areas).
+            # IMPORTANT: Scope to the job top-card area only to avoid picking up location
+            # text from recommended/similar jobs rendered elsewhere on the page.
             if not location:
-                _wt_match = re.search(r'\b(On-site|Hybrid|Remote)\b', page_text_raw, re.IGNORECASE)
+                _top_card_selectors = [
+                    "[data-testid='lazy-column']",
+                    ".job-details-jobs-unified-top-card__container",
+                    ".jobs-unified-top-card",
+                ]
+                _search_text = ""
+                for _sel in _top_card_selectors:
+                    _elem = page.locator(_sel).first
+                    if _elem.count() > 0:
+                        _search_text = _elem.inner_text().strip()
+                        if _search_text:
+                            break
+                # Fall back to full page text only if no scoped element was found
+                if not _search_text:
+                    _search_text = page_text_raw
+
+                _wt_match = re.search(r'\b(On-site|Hybrid|Remote)\b', _search_text, re.IGNORECASE)
                 if _wt_match:
                     workplace_type = _wt_match.group(1)
-                    line_start = page_text_raw.rfind('\n', 0, _wt_match.start()) + 1
-                    preceding = page_text_raw[line_start:_wt_match.start()].strip()
+                    line_start = _search_text.rfind('\n', 0, _wt_match.start()) + 1
+                    preceding = _search_text[line_start:_wt_match.start()].strip()
                     # Strip trailing separators (·, •, -, parens) from the location text
                     preceding = re.sub(r'[\s\u00b7\u2022\-\(]+$', '', preceding).strip()
                     location = f"{preceding} ({workplace_type})" if preceding else workplace_type
