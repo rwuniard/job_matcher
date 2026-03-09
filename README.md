@@ -35,7 +35,7 @@ An automated AI-powered pipeline that evaluates LinkedIn job postings against a 
 
 4. **Report** — A Markdown report is written to `./job_results/` for every processed job, capturing the AI score, gap analysis, and full job description for reference.
 
-5. **Deduplicate** — After processing, the job ID and description are stored in Redis with a 30-day TTL. The same job posting frequently appears across multiple LinkedIn Job Alert emails. Without deduplication, each occurrence would trigger a full Playwright scrape and an LLM evaluation — burning time and API tokens on a job already reviewed. With Redis, the second occurrence is recognised instantly and skipped before any expensive work begins.
+5. **Deduplicate** — After processing, the job ID and description are stored in Redis with a 180-day TTL. The same job posting frequently appears across multiple LinkedIn Job Alert emails. Without deduplication, each occurrence would trigger a full Playwright scrape and an LLM evaluation — burning time and API tokens on a job already reviewed. With Redis, the second occurrence is recognised instantly and skipped before any expensive work begins.
 
 ### Companion project
 
@@ -149,7 +149,7 @@ On each job:
 2. If found → job is skipped as a duplicate
 3. If not found → job is processed, then stored in Redis with the job description
 
-Cached entries expire after **30 days** by default. Each entry stores:
+Cached entries expire after **180 days** (6 months) by default. Each entry stores:
 
 ```json
 {
