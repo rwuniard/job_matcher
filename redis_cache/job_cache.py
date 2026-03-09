@@ -11,7 +11,7 @@ _lock = threading.Lock()
 
 class JobCache:
     _client: redis.Redis | None = None
-    _DEFAULT_TTL_DAYS = 30
+    _DEFAULT_TTL_DAYS = 180
 
     @classmethod
     def connect(cls, host: str, port: int, password: str | None = None) -> None:
@@ -39,7 +39,7 @@ class JobCache:
 
     @classmethod
     def set_job(cls, job_id: str, result: dict, ttl_days: int = _DEFAULT_TTL_DAYS) -> None:
-        """Cache a job result with a TTL. Defaults to 30 days."""
+        """Cache a job result with a TTL. Defaults to 180 days (6 months)."""
         cls._client_or_raise().setex(
             name=f"job:{job_id}",
             time=timedelta(days=ttl_days),
