@@ -134,7 +134,7 @@ Results are saved to `./job_results/` with the job ID as the filename:
 
 | File | Meaning |
 |---|---|
-| `{job_id}.ai_response.md` | AI scoring and gap analysis for open jobs |
+| `{job_id}.{score}.ai_response.md` | AI scoring and gap analysis for open jobs (score is the rounded integer match score, e.g. `7`; decimal scores like `9.5` are rounded to the nearest integer) |
 | `{job_id}.applied.md` | Job was already applied to — skipped |
 | `{job_id}.closed.md` | Job is no longer accepting applications — skipped |
 
@@ -159,6 +159,19 @@ Cached entries expire after **180 days** (6 months) by default. Each entry store
 ```
 
 If Redis is unavailable, the cache check fails open — the job is processed normally rather than silently skipped.
+
+## Error Handling & Retry Behaviour
+
+Message failures are classified into two categories:
+
+| Failure type | Examples | Queue action |
+|---|---|---|
+| **Transient** | Rate limit (HTTP 429), server errors (5xx) | `RELEASED` — requeued for retry |
+| **Permanent** | Invalid model name, bad API key, malformed message | `REJECTED` — sent to Dead Letter Queue (DLQ) |
+
+Transient failures are retried up to **3 times** (controlled by `_MAX_TRANSIENT_RETRIES` in `main.py`). The retry count is tracked via the AMQP `delivery_count` header, which the broker increments automatically on each redelivery. Once the limit is exceeded, the message is sent to the DLQ to avoid infinite loops.
+
+Already-processed jobs within a batch are protected by the Redis cache — if a message is requeued after partially succeeding, previously completed jobs are skipped on the next attempt.
 
 ## Running Tests
 

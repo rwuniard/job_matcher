@@ -41,14 +41,14 @@ _processing_job_ids: set[str] = set()
 _processing_lock = threading.Lock()
 
 _REPORT_HEADER = "# Job Match Report\n\n"
-_SCORE_RE = re.compile(r'Overall Match Score\D*(\d{1,2})/10', re.IGNORECASE)
+_SCORE_RE = re.compile(r'Overall Match Score\D*(\d{1,2}(?:\.\d+)?)/10', re.IGNORECASE)
 _MAX_TRANSIENT_RETRIES = 3
 
 
 def _extract_score(ai_response: str) -> str:
-    """Return the numeric score string from the AI response, or 'na' if not found."""
+    """Return the rounded integer score from the AI response, or 'na' if not found."""
     m = _SCORE_RE.search(ai_response)
-    return m.group(1) if m else "na"
+    return str(round(float(m.group(1)))) if m else "na"
 
 
 def _try_claim_job(job_id: str) -> bool:
