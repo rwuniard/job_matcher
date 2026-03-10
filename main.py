@@ -1,4 +1,4 @@
-from job_matcher_agent import match_job
+from job_matcher_agent import match_job, TransientAgentError
 from queue_consumer import QueueConsumer
 from queue_consumer.message_processor import ProcessingResult
 from models import LinkedInJobAlert
@@ -42,6 +42,7 @@ _processing_lock = threading.Lock()
 
 _REPORT_HEADER = "# Job Match Report\n\n"
 _SCORE_RE = re.compile(r'Overall Match Score\D*(\d{1,2})/10', re.IGNORECASE)
+_MAX_TRANSIENT_RETRIES = 3
 
 
 def _extract_score(ai_response: str) -> str:
@@ -72,7 +73,63 @@ def _try_claim_job(job_id: str) -> bool:
         _processing_job_ids.add(job_id)
         return True
 
-def message_processor(message_id: str, message_body: str) -> ProcessingResult:
+def _write_job_result(job, job_id: str, result: JobMatcherResult, alert_subject: str, alert_date: str) -> None:
+    """Write the job match result to a file."""
+    header = (
+        f"{_REPORT_HEADER}"
+        f"**Job Title:** {job.title}  \n"
+        f"**Job URL:** {job.url}  \n"
+        f"**Email Subject:** {alert_subject}  \n"
+        f"**Email Date:** {alert_date}\n\n"
+    )
+
+    if result.job_status == "applied":
+        with open(f"./job_results/{job_id}.applied.md", "w") as f:
+            f.write(header)
+            f.write("## Status: Applied\n\nYou have already applied to this job.\n")
+
+    elif result.job_status == "closed":
+        with open(f"./job_results/{job_id}.closed.md", "w") as f:
+            f.write(header)
+            f.write("## Status: Closed\n\nThis job is no longer accepting applications.\n")
+
+    elif result.job_status == "open":
+        score = _extract_score(result.ai_response)
+        with open(f"./job_results/{job_id}.{score}.ai_response.md", "w") as f:
+            f.write(header)
+            f.write(f"## AI Analysis\n\n{result.ai_response}\n\n")
+            f.write(f"## Job Description\n\n{result.job_description}\n")
+
+    else:
+        logger.error(f"Invalid job status: {result.job_status} for {job.url}")
+
+
+def _process_single_job(job, alert_subject: str, alert_date: str) -> None:
+    """Process one job. Raises TransientAgentError or other exceptions on failure."""
+    logger.info(f"Processing job-url: {job.url}")
+    job_id = job.url.rstrip("/").split("/")[-1]
+
+    if not _try_claim_job(job_id):
+        logger.warning(f"Skipping duplicate job_id: {job_id}, from email subject: {alert_subject}")
+        return
+
+    try:
+        job_matcher_result = match_job(job.url)
+    finally:
+        with _processing_lock:
+            _processing_job_ids.discard(job_id)
+
+    logger.info(f"Job Matcher Result: {job_matcher_result}")
+
+    try:
+        JobCache.set_job(job_id, {"job_id": job_id, "job_description": job_matcher_result.job_description})
+    except Exception as e:
+        logger.warning(f"Failed to cache job_id: {job_id}. Error: {e}")
+
+    _write_job_result(job, job_id, job_matcher_result, alert_subject, alert_date)
+
+
+def message_processor(message_id: str, message_body: str, delivery_count: int) -> ProcessingResult:
     """
     Message processor function for processing messages from the AMQP broker.
     This function is called by the QueueConsumer when a new message is received.
@@ -80,12 +137,12 @@ def message_processor(message_id: str, message_body: str) -> ProcessingResult:
     Args:
         message_id: The ID of the message
         message_body: The body of the message
+        delivery_count: Number of prior delivery attempts (0 = first attempt).
     Returns:
         ProcessingResult.ACCEPTED  — all jobs processed, remove from queue.
         ProcessingResult.RELEASED  — transient failure, requeue for retry.
-        ProcessingResult.REJECTED  — malformed message, send to Dead Letter Queue.
+        ProcessingResult.REJECTED  — malformed message or retry limit exceeded, send to DLQ.
     """
-    # Parse the envelope once — if this fails the message is genuinely malformed.
     try:
         alert = LinkedInJobAlert.model_validate_json(message_body)
     except Exception as e:
@@ -94,74 +151,27 @@ def message_processor(message_id: str, message_body: str) -> ProcessingResult:
 
     os.makedirs("./job_results", exist_ok=True)
 
+    has_transient_failure = False
+    has_permanent_failure = False
+
     for job in alert.jobs:
-        # Each job is independent — one failure must not affect the others.
         try:
-            logger.info(f"Processing job-url: {job.url}")
-
-            job_id = job.url.rstrip("/").split("/")[-1]
-            if not _try_claim_job(job_id):
-                logger.warning(f"Skipping duplicate job_id: {job_id}, from email subject: {alert.subject}")
-                continue
-
-            try:
-                job_matcher_result = match_job(job.url)
-            finally:
-                with _processing_lock:
-                    _processing_job_ids.discard(job_id)
-            logger.info(f"Job Matcher Result: {job_matcher_result}")
-
-            try:
-                JobCache.set_job(job_id, {
-                    "job_id": job_id,
-                    "job_description": job_matcher_result.job_description,
-                })
-            except Exception as e:
-                logger.warning(f"Failed to cache job_id: {job_id}. Error: {e}")
-
-            if job_matcher_result.job_status == "applied":
-                with open(f"./job_results/{job_id}.applied.md", "w") as f:
-                    f.write(_REPORT_HEADER)
-                    f.write(f"**Job Title:** {job.title}  \n")
-                    f.write(f"**Job URL:** {job.url}  \n")
-                    f.write(f"**Email Subject:** {alert.subject}  \n")
-                    f.write(f"**Email Date:** {alert.date}\n\n")
-                    f.write("## Status: Applied\n\n")
-                    f.write("You have already applied to this job.\n")
-
-            elif job_matcher_result.job_status == "closed":
-                with open(f"./job_results/{job_id}.closed.md", "w") as f:
-                    f.write(_REPORT_HEADER)
-                    f.write(f"**Job Title:** {job.title}  \n")
-                    f.write(f"**Job URL:** {job.url}  \n")
-                    f.write(f"**Email Subject:** {alert.subject}  \n")
-                    f.write(f"**Email Date:** {alert.date}\n\n")
-                    f.write("## Status: Closed\n\n")
-                    f.write("This job is no longer accepting applications.\n")
-
-            elif job_matcher_result.job_status == "open":
-                score = _extract_score(job_matcher_result.ai_response)
-                with open(f"./job_results/{job_id}.{score}.ai_response.md", "w") as f:
-                    f.write(_REPORT_HEADER)
-                    f.write(f"**Job Title:** {job.title}  \n")
-                    f.write(f"**Job URL:** {job.url}  \n")
-                    f.write(f"**Email Subject:** {alert.subject}  \n")
-                    f.write(f"**Email Date:** {alert.date}\n\n")
-                    f.write("## AI Analysis\n\n")
-                    f.write(f"{job_matcher_result.ai_response}\n\n")
-                    f.write("## Job Description\n\n")
-                    f.write(f"{job_matcher_result.job_description}\n")
-
+            _process_single_job(job, alert.subject, alert.date)
+        except TransientAgentError as e:
+            if delivery_count >= _MAX_TRANSIENT_RETRIES:
+                logger.error(f"Transient error exceeded max retries ({_MAX_TRANSIENT_RETRIES}) for job-url: {job.url}, sending to DLQ. Error: {e}")
+                has_permanent_failure = True
             else:
-                # Bug 3 fix: log and continue; don't abandon remaining jobs in the loop.
-                logger.error(f"Invalid job status: {job_matcher_result.job_status} for {job.url}")
-
+                logger.warning(f"Transient error (attempt {delivery_count + 1}/{_MAX_TRANSIENT_RETRIES + 1}) for job-url: {job.url}, requeueing. Error: {e}")
+                has_transient_failure = True
         except Exception as e:
-            # Log and continue to the next job — individual job failures do not
-            # affect remaining jobs, and the message is still accepted to avoid
-            # reprocessing already-completed jobs (idempotency protection).
-            logger.error(f"Error processing job-url: {job.url}, error: {e}")
+            logger.error(f"Permanent error processing job-url: {job.url}, error: {e}")
+            has_permanent_failure = True
 
+    if has_permanent_failure:
+        return ProcessingResult.REJECTED
+    if has_transient_failure:
+        return ProcessingResult.RELEASED
     return ProcessingResult.ACCEPTED
 
    

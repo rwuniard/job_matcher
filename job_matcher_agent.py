@@ -22,6 +22,11 @@ logger = logging.getLogger(__name__)
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
+
+class TransientAgentError(Exception):
+    """Raised when the agent fails due to a transient condition (rate limit, network, etc.)
+    that is safe to retry by requeuing the message."""
+
 _PROMPT_FILE = os.path.join(os.path.dirname(__file__), "prompts", "system_prompt.txt")
 with open(_PROMPT_FILE, encoding="utf-8") as _f:
     _SYSTEM_PROMPT = _f.read()
@@ -39,7 +44,7 @@ def match_job(job_url: str) -> JobMatcherResult:
     """
     logger.info(f"Matching job-url: {job_url}")
 
-    model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
+    model = ChatGoogleGenerativeAI(model="gemini-2.5-pro", temperature=0)
 
     agent = create_agent(
         model=model,
@@ -78,7 +83,15 @@ def match_job(job_url: str) -> JobMatcherResult:
     Job Description: {job.description}
     """
 
-    results = agent.invoke({"messages": [{"role": "user", "content": user_message}]})
+    try:
+        results = agent.invoke({"messages": [{"role": "user", "content": user_message}]})
+    except Exception as e:
+        # HTTP 429 (rate limit) and 5xx (server errors) are transient — safe to retry.
+        # Everything else (e.g. invalid model name, bad API key) is permanent.
+        status = getattr(e, "status_code", None) or getattr(e, "code", None)
+        if status in (429, 500, 502, 503, 504):
+            raise TransientAgentError(str(e)) from e
+        raise
 
     ai_response = results.get("messages")[-1].content
     logger.debug("Job Matcher Result: %s", ai_response)

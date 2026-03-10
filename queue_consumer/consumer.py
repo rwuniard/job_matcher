@@ -70,7 +70,7 @@ class ConsumerHandler(MessagingHandler):
 
         def _process():
             try:
-                result = self.message_processor(msg.id, msg.body)
+                result = self.message_processor(msg.id, msg.body, msg.delivery_count)
             except Exception as e:
                 logger.error(f"message-id: {msg.id} processing raised exception: {e}")
                 result = ProcessingResult.RELEASED

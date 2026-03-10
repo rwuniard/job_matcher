@@ -14,12 +14,13 @@ class MessageProcessor(Protocol):
     This is a protocol that defines the interface for processing messages from the AMQP broker.
     """
 
-    def __call__(self, message_id: str, message_body: str) -> ProcessingResult:
+    def __call__(self, message_id: str, message_body: str, delivery_count: int) -> ProcessingResult:
         """
         Process a message from the AMQP broker.
         Args:
             message_id: The ID of the message
             message_body: The body of the message
+            delivery_count: Number of times this message has been delivered (0 = first attempt).
         Returns:
             ProcessingResult.ACCEPTED  — success, remove from queue.
             ProcessingResult.RELEASED  — transient failure, requeue for retry.
