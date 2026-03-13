@@ -44,7 +44,7 @@ def match_job(job_url: str) -> JobMatcherResult:
     """
     logger.info(f"Matching job-url: {job_url}")
 
-    model = ChatGoogleGenerativeAI(model="gemini-2.5-pro", temperature=0)
+    model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.5)
 
     agent = create_agent(
         model=model,

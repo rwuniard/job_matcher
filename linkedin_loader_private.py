@@ -138,10 +138,18 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
                 _wt_match = re.search(r'\b(On-site|Hybrid|Remote)\b', _search_text, re.IGNORECASE)
                 if _wt_match:
                     workplace_type = _wt_match.group(1)
-                    line_start = _search_text.rfind('\n', 0, _wt_match.start()) + 1
-                    preceding = _search_text[line_start:_wt_match.start()].strip()
-                    # Strip trailing separators (·, •, -, parens) from the location text
-                    preceding = re.sub(r'[\s\u00b7\u2022\-\(]+$', '', preceding).strip()
+                    # LinkedIn sometimes renders city and workplace type on separate lines,
+                    # with separator-only lines (e.g. "·") in between.  Walk backwards
+                    # through the lines before the match, skipping blank/separator-only
+                    # lines, to find the actual city/state line.
+                    _separator_only = re.compile(r'^[\s\u00b7\u2022\-\(]+$')
+                    _lines_before = _search_text[:_wt_match.start()].splitlines()
+                    preceding = ""
+                    for _line in reversed(_lines_before):
+                        _candidate = re.sub(r'[\s\u00b7\u2022\-\(]+$', '', _line).strip()
+                        if _candidate and not _separator_only.match(_line.strip()):
+                            preceding = _candidate
+                            break
                     location = f"{preceding} ({workplace_type})" if preceding else workplace_type
 
             if "no longer accepting applications" in page_text:
