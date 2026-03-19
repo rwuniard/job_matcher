@@ -69,6 +69,9 @@ def match_job(job_url: str) -> JobMatcherResult:
         print("The candidate has applied to the job or the job is closed.")
         return JobMatcherResult(job_url=job_url, job_status=job.status, ai_response="")
 
+    if not job.description:
+        raise TransientAgentError(f"Job description is empty for {job_url} — LinkedIn may be slow. Will retry.")
+
     # get today's date, so the LLM knows the current date.
     today_date = date.today()
 

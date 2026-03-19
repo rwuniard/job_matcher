@@ -47,6 +47,48 @@ def _check_session(browser: BrowserContext, page: Page) -> None:
         )
 
 
+def _location_from_json_ld(page: Page) -> tuple[str, str]:
+    """
+    Extract job location from JSON-LD structured data embedded in the page.
+
+    LinkedIn includes schema.org JobPosting markup for Google Jobs integration.
+    This is far more stable than CSS class names, which change with every UI redesign.
+
+    Returns:
+        (place, workplace_type) — e.g. ("Arlington, VA", "Remote") or ("", "")
+        workplace_type is "Remote" when jobLocationType is TELECOMMUTE; otherwise ""
+        because On-site / Hybrid are not reliably encoded in the schema.
+    """
+    try:
+        ld_data = page.evaluate("""
+            () => {
+                for (const el of document.querySelectorAll('script[type="application/ld+json"]')) {
+                    try {
+                        const d = JSON.parse(el.textContent);
+                        if (d['@type'] === 'JobPosting') return d;
+                    } catch (e) {}
+                }
+                return null;
+            }
+        """)
+    except Exception:
+        return "", ""
+
+    if not isinstance(ld_data, dict):
+        return "", ""
+
+    job_loc = ld_data.get("jobLocation")
+    if isinstance(job_loc, list):
+        job_loc = job_loc[0] if job_loc else {}
+    addr = job_loc.get("address", {}) if isinstance(job_loc, dict) else {}
+    city = addr.get("addressLocality", "").strip()
+    region = addr.get("addressRegion", "").strip()
+    place = f"{city}, {region}" if city and region else city or region
+
+    is_remote = ld_data.get("jobLocationType", "").upper() == "TELECOMMUTE"
+    return place, ("Remote" if is_remote else "")
+
+
 def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
     """
     Load a LinkedIn job posting using Playwright.
@@ -85,39 +127,70 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
             page.wait_for_selector("[data-testid='lazy-column']", timeout=30000)
             page.wait_for_timeout(1000)
 
+            # Wait for the description section to appear (LinkedIn can be slow loading it).
+            # Tries each known selector; moves on if none appear within 15 s.
+            _desc_wait_selectors = [
+                "[data-sdui-component*='aboutTheJob']",
+                "#job-details",
+                ".jobs-description__content",
+                ".jobs-description-content__text",
+                "[data-testid='expandable-text-box']",
+            ]
+            for _sel in _desc_wait_selectors:
+                try:
+                    page.wait_for_selector(_sel, timeout=15000)
+                    break
+                except Exception:
+                    continue
+
             # Extract job title from the page <title> tag: "Job Title | Company | LinkedIn"
             # This is far more stable than any DOM class or SDUI component name.
             raw_title = page.title()
             title = raw_title.split(" | ")[0].strip() if " | " in raw_title else raw_title.strip()
 
-            # Extract location + work type from the top-card header.
-            # LinkedIn renders this as: "Company · City, State (On-site)" in a subtitle line.
-            # We try specific selectors first, then fall back to regex on raw page text.
+            # --- Location extraction (three-tier, most stable first) ---
+            #
+            # Tier 1: JSON-LD structured data  — LinkedIn maintains this for Google Jobs;
+            #         city/state is reliable here regardless of UI redesigns.
+            # Tier 2: CSS selectors             — works while the class names are stable.
+            # Tier 3: Regex on top-card text    — last resort; brittle but broad.
+            #
+            # Rule: JSON-LD city always wins if present. Workplace type (On-site/Hybrid)
+            # comes from CSS/regex because schema.org only encodes TELECOMMUTE (Remote).
+
+            ld_place, ld_workplace = _location_from_json_ld(page)
+            logger.debug("JSON-LD location: place=%r workplace_type=%r", ld_place, ld_workplace)
+
             location = ""
-            _location_selectors = [
-                ".job-details-jobs-unified-top-card__primary-description-without-tagline",
-                ".job-details-jobs-unified-top-card__primary-description",
-                ".jobs-unified-top-card__primary-description",
-                ".jobs-unified-top-card__workplace-type",
-            ]
-            for _sel in _location_selectors:
-                _elem = page.locator(_sel).first
-                if _elem.count() > 0:
-                    _text = _elem.inner_text().strip()
-                    if _text:
-                        location = _text
-                        break
 
-            # Detect application status — full page text is the most reliable fallback
-            # because LinkedIn frequently renames CSS classes and SDUI components.
-            page_text_raw = page.locator("body").inner_text()
-            page_text = page_text_raw.lower()
+            # Tier 1 short-circuit: JSON-LD has both city and Remote → done.
+            if ld_place and ld_workplace:
+                location = f"{ld_place} ({ld_workplace})"
 
-            # Regex fallback: find the workplace type, then extract whatever location
-            # text appears on the same line immediately before it.
-            # This handles any city/region/country format (US, international, metro areas).
-            # IMPORTANT: Scope to the job top-card area only to avoid picking up location
-            # text from recommended/similar jobs rendered elsewhere on the page.
+            # Tier 2: CSS selectors.
+            # Even when JSON-LD gave us a city, run CSS to pick up On-site / Hybrid.
+            if not location:
+                _location_selectors = [
+                    ".job-details-jobs-unified-top-card__primary-description-without-tagline",
+                    ".job-details-jobs-unified-top-card__primary-description",
+                    ".jobs-unified-top-card__primary-description",
+                    ".jobs-unified-top-card__workplace-type",
+                ]
+                for _sel in _location_selectors:
+                    _elem = page.locator(_sel).first
+                    if _elem.count() > 0:
+                        _text = _elem.inner_text().strip()
+                        if _text:
+                            if ld_place:
+                                # Substitute the JSON-LD city for whatever city CSS found
+                                # (CSS may return country-level, e.g. "United States (Remote)")
+                                _wt = re.search(r'\b(On-site|Hybrid|Remote)\b', _text, re.IGNORECASE)
+                                location = f"{ld_place} ({_wt.group(1)})" if _wt else ld_place
+                            else:
+                                location = _text
+                            break
+
+            # Tier 3: Regex on scoped top-card text.
             if not location:
                 _top_card_selectors = [
                     "[data-testid='lazy-column']",
@@ -131,26 +204,40 @@ def get_linkedin_job(url: str, first_login: bool = False) -> LinkedInJob:
                         _search_text = _elem.inner_text().strip()
                         if _search_text:
                             break
-                # Fall back to full page text only if no scoped element was found
                 if not _search_text:
-                    _search_text = page_text_raw
+                    _search_text = page.locator("body").inner_text()
 
                 _wt_match = re.search(r'\b(On-site|Hybrid|Remote)\b', _search_text, re.IGNORECASE)
                 if _wt_match:
                     workplace_type = _wt_match.group(1)
-                    # LinkedIn sometimes renders city and workplace type on separate lines,
-                    # with separator-only lines (e.g. "·") in between.  Walk backwards
-                    # through the lines before the match, skipping blank/separator-only
-                    # lines, to find the actual city/state line.
-                    _separator_only = re.compile(r'^[\s\u00b7\u2022\-\(]+$')
-                    _lines_before = _search_text[:_wt_match.start()].splitlines()
-                    preceding = ""
-                    for _line in reversed(_lines_before):
-                        _candidate = re.sub(r'[\s\u00b7\u2022\-\(]+$', '', _line).strip()
-                        if _candidate and not _separator_only.match(_line.strip()):
-                            preceding = _candidate
-                            break
-                    location = f"{preceding} ({workplace_type})" if preceding else workplace_type
+                    if ld_place:
+                        location = f"{ld_place} ({workplace_type})"
+                    else:
+                        _separator_only = re.compile(r'^[\s\u00b7\u2022\-\(]+$')
+                        _city_state_re = re.compile(r'^[A-Z][^·\n]+,\s*[A-Z]')
+                        _lines_before = _search_text[:_wt_match.start()].splitlines()
+                        preceding = ""
+                        first_non_sep = ""
+                        for _line in reversed(_lines_before):
+                            _candidate = re.sub(r'[\s\u00b7\u2022\-\(]+$', '', _line).strip()
+                            if _candidate and not _separator_only.match(_line.strip()):
+                                if not first_non_sep:
+                                    first_non_sep = _candidate
+                                if _city_state_re.match(_candidate):
+                                    preceding = _candidate
+                                    break
+                        if not preceding:
+                            preceding = first_non_sep
+                        location = f"{preceding} ({workplace_type})" if preceding else workplace_type
+
+            # Final safety net: JSON-LD had a city but no workplace type resolved anywhere
+            if not location and ld_place:
+                location = ld_place
+
+            # Detect application status — full page text is the most reliable fallback
+            # because LinkedIn frequently renames CSS classes and SDUI components.
+            page_text_raw = page.locator("body").inner_text()
+            page_text = page_text_raw.lower()
 
             if "no longer accepting applications" in page_text:
                 status = "closed"
